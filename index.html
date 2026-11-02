@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8">
+<html lang="ru">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Спаси чат Мазелова</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,7 +15,7 @@ html{font-size:calc(min(100vw,480px)/24.375)}
 body{background:var(--s);color:var(--k);font:700 1rem Onest,sans-serif;height:100vh;overflow:hidden;overscroll-behavior:none}
 button{font-family:Unbounded,sans-serif;font-weight:900;color:var(--k);cursor:pointer}
 canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:none}
-.scr{position:fixed;inset:0;display:none;flex-direction:column;padding:3.3rem 1.5rem 1rem;max-width:480px;margin:auto}
+.scr{position:fixed;inset:0 0 15% 0;display:none;flex-direction:column;padding:1.5rem;max-width:480px;margin:auto;justify-content:center}
 .scr.on{display:flex}
 .t{font:900 2.3rem/1.05 Unbounded,sans-serif;letter-spacing:-.03em}
 .t b{display:inline-block;background:var(--p);color:#fff;font-size:2.4rem;padding:.25rem .7rem;margin:.5rem 0 0 -.5rem;border:.15rem solid var(--k);box-shadow:.35rem .35rem 0 var(--k);transform:rotate(-2deg)}
@@ -22,10 +24,8 @@ canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none;display:n
 .card p{font-size:1.15rem;line-height:1.3;font-weight:800}
 .card i{display:block;margin-top:.5rem;font-style:normal;color:var(--p)}
 .sp{display:flex;gap:1.4rem;justify-content:center;align-items:center;margin:1.8rem 0}
-.sp div{display:grid;place-items:center;border:.25rem solid var(--k);overflow:hidden}
-.sp img{width:80%}
-.circ{width:9.6rem;height:9.6rem;border-radius:50%;background:#fff8e1}
-.hv{width:7.2rem;height:8.5rem;border-radius:2.4rem 2.4rem 1.6rem 1.6rem;background:var(--y)}
+.sp div{display:flex;justify-content:center;align-items:center}
+.sp img{height:8.5rem;width:auto;object-fit:contain}
 .play{width:100%;padding:1.1rem;border:0;border-radius:1.6rem;background:var(--k);color:var(--l);font-size:1.9rem;box-shadow:0 .4rem 0 var(--p);margin-top:.4rem}
 .row{display:flex;gap:1rem;margin-top:1.1rem}
 .sec{flex:1;padding:1rem;border:.2rem solid var(--k);border-radius:1.6rem;background:#fff;font-size:1.2rem;box-shadow:.3rem .3rem 0 var(--k)}
@@ -46,21 +46,31 @@ small{text-align:center;margin-top:.9rem;color:var(--d);font-size:.9rem}
 .r em{font:900 1rem Unbounded,sans-serif;font-style:normal}
 .av{position:relative;width:2.4rem;height:2.4rem;border-radius:50%;background:var(--p);color:#fff;display:grid;place-items:center;overflow:hidden;flex:none}
 .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-</style></head><body>
+</style>
+</head>
+<body>
 <canvas id="cv"></canvas>
 <main id="m" class="scr on">
 <h1 class="t">СПАСИ ЧАТ<br><b>МАЗЕЛОВА</b></h1>
 <div class="card"><p id="qt"></p><i id="qn"></i></div>
-<div class="sp"><div class="circ"><img id="i1"></div><div class="hv"><img id="i2"></div></div>
+<div class="sp">
+  <div><img id="i1" src="./img/player.png"></div>
+  <div><img id="i2" src="./img/boss.png"></div>
+</div>
 <button class="play" id="pl">ИГРАТЬ</button>
 <div class="row"><button class="sec" id="tp">ТОП</button><button class="sec off" disabled>СКИНЫ</button></div>
 <small>скинов покашо нет тут покашо нихуч нет патом будет</small>
-<div class="gr"></div>
 </main>
+<div class="gr"></div>
 <section id="t" class="scr"><div class="hd"><button class="sec" id="bk">←</button><h2>ТОП ЧАТА</h2></div><div class="L" id="L"></div></section>
 <section id="o" class="scr"></section>
 <script>
 (()=>{
+  const IM = {
+  il: "./img/player.png", // Спрайт игрока
+  bl: "./img/bullet.png", // Спрайт снаряда/пули
+  hv: "./img/boss.png"    // Спрайт босса/цели
+};
 const Q=[["Я не хотел репорт кидать","blue"],["Вот это уже пиздец настоящий, умри ебанутый","артем"], ["я ел гавно", "ілюша"]];
 const FB={apiKey:"AIzaSyBAnZWyL-ZrU3egfVbomay6G1DNA_zp5As",authDomain:"mzlffchat.firebaseapp.com",projectId:"mzlffchat",appId:"1:401998690106:web:4f1da7f73eb3993bb70203"};
 
@@ -77,8 +87,9 @@ db.collection('scores').doc(uid).get().then(s=>{if(s.exists)sb=s.data().score}).
 const send=()=>{if(!db||!sid||!ok()||a<=sb)return;const s=a;
 db.collection('scores').doc(uid).set({name:me.name.slice(0,32),photo:me.photo,score:s,sid,t:FV.serverTimestamp()}).then(()=>sb=s).catch(()=>{})};
 
-const IMG={};for(const k in IM){IMG[k]=new Image();IMG[k].src=IM[k]}
-$('#i1').src=IM.il;$('#i2').src=IM.hv;
+// Загружаем картинки напрямую без base64
+const IMG = { il: $('#i1'), hv: $('#i2'), bl: new Image() };
+IMG.bl.src = "./img/bullet.png";
 
 const W=390,GH=64,PW=58,PH=72,HW=76,HH=93,HT=58,cv=$('#cv'),x=cv.getContext('2d');
 const KEY=(Math.random()*1e9)|0;
@@ -176,4 +187,7 @@ document.addEventListener('contextmenu',e=>e.preventDefault());
 let l=0;const fr=n=>{const dt=Math.min(.033,(n-l)/1e3||0);l=n;if(st=='p')up(dt);if(st=='p'||st=='o')dr();requestAnimationFrame(fr)};
 menu();requestAnimationFrame(fr);
 })();
-</script></body></html>
+</script>
+</body>
+</html>
+```eof
