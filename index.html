@@ -194,7 +194,26 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 @keyframes rdy{50%{transform:scale(1.25)}}
 
 /* Админ-панель владельца */
-.adm-open{display:none;width:100%;margin-top:.85rem;background:#5b3de0;color:#fff;box-shadow:0 .25rem 0 #14142b}
+.adm-help{font-size:.82rem;line-height:1.35;color:var(--d);margin:.25rem 0 .7rem}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.6rem}
+.adm-grid .sec{font-size:.72rem;padding:.75rem .35rem;border-radius:.85rem;box-shadow:.16rem .16rem 0 var(--k)}
+.adm-grid .sec.danger{background:#ffe1e6;color:#a00026}
+.adm-grid .sec.purple{background:#5b3de0;color:#fff}
+.adm-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:end}
+.adm-statgrid{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-top:.6rem}
+.adm-stat{background:#f1f3fa;border:.14rem solid var(--k);border-radius:.8rem;padding:.55rem .65rem;min-width:0}
+.adm-stat span{display:block;font-size:.66rem;color:var(--d);font-weight:900}
+.adm-stat b{display:block;font:900 .9rem Unbounded,sans-serif;overflow-wrap:anywhere;margin-top:.2rem}
+.adm-playerlist{display:flex;flex-direction:column;gap:.45rem;margin-top:.6rem}
+.adm-player{width:100%;display:flex;gap:.5rem;align-items:center;text-align:left;background:#f1f3fa;border:.14rem solid var(--k);border-radius:.8rem;padding:.6rem;font:800 .8rem Onest,sans-serif}
+.adm-player b{font:900 .75rem Unbounded,sans-serif;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.adm-player span{margin-left:auto;color:var(--p);white-space:nowrap}
+.adm-result.ok{color:#267a20}.adm-result.err{color:#b00035}
+.adm-divider{height:1px;background:#d8dce8;margin:.7rem 0}
+#ad{padding-bottom:calc(var(--g) + .8rem)}
+@media(max-width:360px){.adm-grid .sec{font-size:.64rem}.adm-player{font-size:.72rem}}
+
+.adm-open{display:none;width:auto;flex:none;margin:0;background:#5b3de0;color:#fff;box-shadow:0 .22rem 0 #14142b;padding:.58rem .72rem;font-size:.68rem;border-radius:.85rem;white-space:nowrap}
 #ad{overflow-y:auto;gap:.75rem;touch-action:pan-y}
 #ad .adm-card{margin:0;padding:1rem}
 .adm-note{font-size:.82rem;line-height:1.35;color:var(--d);margin:.35rem 0 .75rem}
@@ -207,13 +226,12 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 </style></head><body>
 <canvas id="cv"></canvas>
 <main id="m" class="scr on">
-<div class="tp"><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">0</span></div></div>
+<div class="tp"><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">0</span></div><button class="sec adm-open" id="adminEntry" data-a="admin">⚙ АДМИН</button></div>
 <h1 class="t">СПАСИ ЧАТ<br><b>МАЗЕЛОВА</b></h1>
 <div class="card"><p id="qt"></p><i id="qn"></i></div>
 <div class="sp"><img id="i1" alt=""><img id="i2" alt=""></div>
 <button class="play" data-a="go">ИГРАТЬ</button>
 <div class="row"><button class="sec" data-a="top">ТОП</button><button class="sec yl" data-a="shop">МАГАЗИН</button></div>
-<button class="sec adm-open" id="adminEntry" data-a="admin">⚙ АДМИН-ПАНЕЛЬ</button>
 <div class="gr"></div>
 </main>
 <section id="t" class="scr"><div class="hd"><button class="sec bk" data-a="menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>ТОП ЧАТА</h2><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">0</span></div></div><div class="L" id="L"></div><div class="gr"></div></section>
@@ -272,11 +290,11 @@ mk('ct9','ct','пушін','pushin.webp',UF)
 ];
 const CH=[['il','ИГРОК'],['ct','КОТИК'],['nc','НЕКТАРИН'],['bl','ШАРИК']];/* ЭКОНОМИКА (ориентир: 1 минута активной игры ≈ 20 монет)
    Доход: монета в среднем 1.48 (88% по 1, 12% по 5), падает раз в ~2.4 с, ловится ~60% → ≈ 20-22 монеты/мин, плюс награда за босса 25..50.
-   Ящик BOX = 500 ≈ 25 мин игры. Первые ящики дешевле (RAMP: 100·200·300·400·500), чтобы первая награда пришла за один заход.
+   Ящик стоит фиксированные 100 монет. Цена не растёт и не зависит от числа открытий.
    Дубль возвращает DUP = 25% цены. После PITY = 4 дублей подряд следующий ящик гарантированно даёт новый скин.
    Полная коллекция (26 скинов) ≈ 60 ящиков ≈ 25к монет ≈ 20 часов игры. Цену любой новой штуки считай как минуты игры × 20.
-   Значения из Firebase config/game (box, dup, ramp, pity, cd) перекрывают эти. */
-let BOX=500,DUP=125,RAMP=5,PITY=4;
+   Firebase config/game может менять только отдельные параметры дубликатов и pity; box/ramp игнорируются. */
+const BOX=100;let DUP=25,RAMP=1,PITY=4;
 const FB={apiKey:"AIzaSyBAnZWyL-ZrU3egfVbomay6G1DNA_zp5As",authDomain:"mzlffchat.firebaseapp.com",projectId:"mzlffchat",appId:"1:401998690106:web:4f1da7f73eb3993bb70203"};
 
 const T=window.Telegram?.WebApp,$=s=>document.querySelector(s),R=(a,b)=>a+Math.random()*(b-a),C=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -382,7 +400,7 @@ const drc=(X,Y,r,sx=1)=>{const m=IMG.cn;x.save();x.translate(X,Y);x.scale(sx,1);
 const sk_=id=>SK.find(q=>q.id==id),ow=q=>q.d||WL.own.includes(q.id),lk=q=>!ow(q),pic=q=>Array.isArray(q.f)?q.f[0]:q.f;
 const eqS=ch=>sk_(WL.eq[ch])||SK.find(q=>q.ch==ch&&(q.d||q.s&&ow(q)));
 const cu=c=>SK.some(q=>q.ch==c&&(q.d||q.s)&&ow(q)),bp=()=>SK.filter(q=>!q.d&&(q.s||cu(q.ch)));
-const bpx=()=>Math.max(10,Math.round(BOX*Math.min(1,(WL.bx+1)/Math.max(1,RAMP))/10)*10);
+const bpx=()=>100; // Цена ящика фиксированная: всегда 100 монет
 const aby=q=>q.u||q.a?`<div class="by">${avt(q)}<span>арт: ${esc(anm(q))}</span></div>`:`<span class="al">${q.d?'стандартный скин':'базовый персонаж'}</span>`;
 const abyModal=q=>q.u||q.a?`<div class="by">${avt(q)}<span>арт: ${esc(anm(q))}</span></div>`:'';
 const CI=`<img class="ci" src="coin.webp" alt="">`;
@@ -410,7 +428,7 @@ const g=$('#s .gd');if(g)g.scrollTop=sy;cshow()}
 // экран «Ящики»
 const BOXSVG='<svg viewBox="0 0 100 100"><ellipse cx="50" cy="94" rx="34" ry="5" fill="rgba(20,20,43,.35)"/><rect x="19" y="45" width="70" height="46" rx="7" fill="#14142b"/><g stroke="#14142b" stroke-width="4" stroke-linejoin="round"><rect x="15" y="41" width="70" height="46" rx="7" fill="#ffe600"/><rect x="42" y="41" width="16" height="46" fill="#ff2d55"/></g><text x="50" y="76" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="900" font-size="22" fill="#fff" stroke="#14142b" stroke-width="3" paint-order="stroke">?</text><g class="lid" stroke="#14142b" stroke-width="4" stroke-linejoin="round"><rect x="10" y="25" width="80" height="22" rx="7" fill="#c3ff00"/><rect x="42" y="25" width="16" height="22" fill="#ff2d55"/></g><g fill="#fff" stroke="#14142b" stroke-width="2" stroke-linejoin="round"><path class="sp1" d="M88 8l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z"/><path class="sp2" d="M9 52l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></g></svg>';
 function rbx(){const sy=$('#x').scrollTop,P=bp(),gt=P.filter(ow).length,PR=bpx(),done=P.every(ow),can=!done&&WL.c>=PR,pr=Math.min(100,WL.c/PR*100);
-$('#x').innerHTML=hdr('ЯЩИК')+`<div class="card bx"><div class="bxi" id="bxi">${BOXSVG}</div><h2>ЯЩИК</h2><p>внутри один случайный скин · шансы у всех равные</p>${done?'<button class="play ok static">✓ КОЛЛЕКЦИЯ СОБРАНА</button>':`<div class="bxp"><span style="width:${pr}%"></span></div><div class="bxn"><span>${Math.min(WL.c,PR)} / ${PR}</span>${CI}</div>${can?`<button class="play yl" data-a="opn"><span>ОТКРЫТЬ · ${PR}</span>${CI}</button>`:`<button class="play off"><span>ЕЩЁ ${PR-WL.c}</span>${CI}</button>`}`}<small class="bs">${done?'новые скины появятся в ящике позже':[PR<BOX?'стартовая цена, потом '+BOX:'',DUP?'за дубль вернём '+DUP:'',PITY?'после '+PITY+' дублей подряд — новый':''].filter(Boolean).join(' · ')}</small></div><div class="card"><div class="hh"><h4>ЧТО ВНУТРИ</h4><span>${gt}/${P.length}</span></div><div class="dg">${P.map(q=>`<div class="dt${ow(q)?' got':' lk'}">${img(q)}${ow(q)||q.s?`<b class="ok">${ow(q)?'✓':'★'}</b>`:''}</div>`).join('')||'<p>пока пусто</p>'}</div>${CH.some(c=>!cu(c[0]))?'<p class="dn">★ — новый персонаж; его скины появятся в ящике, когда он выпадет</p>':''}</div>`+nav('x');$('#x').scrollTop=sy;cshow()}
+$('#x').innerHTML=hdr('ЯЩИК')+`<div class="card bx"><div class="bxi" id="bxi">${BOXSVG}</div><h2>ЯЩИК</h2><p>внутри один случайный скин · шансы у всех равные</p>${done?'<button class="play ok static">✓ КОЛЛЕКЦИЯ СОБРАНА</button>':`<div class="bxp"><span style="width:${pr}%"></span></div><div class="bxn"><span>${Math.min(WL.c,PR)} / ${PR}</span>${CI}</div>${can?`<button class="play yl" data-a="opn"><span>ОТКРЫТЬ · ${PR}</span>${CI}</button>`:`<button class="play off"><span>ЕЩЁ ${PR-WL.c}</span>${CI}</button>`}`}<small class="bs">${done?'новые скины появятся в ящике позже':['цена всегда 100 монет',DUP?'за дубль вернём '+DUP:'',PITY?'после '+PITY+' дублей подряд — новый':''].filter(Boolean).join(' · ')}</small></div><div class="card"><div class="hh"><h4>ЧТО ВНУТРИ</h4><span>${gt}/${P.length}</span></div><div class="dg">${P.map(q=>`<div class="dt${ow(q)?' got':' lk'}">${img(q)}${ow(q)||q.s?`<b class="ok">${ow(q)?'✓':'★'}</b>`:''}</div>`).join('')||'<p>пока пусто</p>'}</div>${CH.some(c=>!cu(c[0]))?'<p class="dn">★ — новый персонаж; его скины появятся в ящике, когда он выпадет</p>':''}</div>`+nav('x');$('#x').scrollTop=sy;cshow()}
 const mo=h=>{$('#md').innerHTML=h;$('#md').classList.add('on')};
 function mc(){$('#md').classList.remove('on')}
 function shop(){st='m';rsk();scr('s')}
@@ -428,64 +446,130 @@ ap();cshow();
 (async()=>{if(!db)return;try{
 const[s,g]=await Promise.all([db.collection('config').doc('skins').get(),db.collection('config').doc('game').get()]);
 const gd=g.exists&&g.data();
-if(gd){if(gd.cd)Object.assign(CD,gd.cd);if(gd.box>0)BOX=gd.box;if(gd.dup>=0)DUP=gd.dup;if(gd.ramp>=1)RAMP=gd.ramp|0;if(gd.pity>=0)PITY=gd.pity|0;}
+if(gd){if(gd.cd)Object.assign(CD,gd.cd);if(gd.dup>=0)DUP=gd.dup;if(gd.pity>=0)PITY=gd.pity|0; /* box/ramp intentionally ignored: chest is always 100 */}
 const l=s.exists&&s.data().list;
 if(Array.isArray(l))for(const q of l){if(!q||!q.id)continue;const z=sk_(q.id);if(z){if(q.n)z.n=q.n;if(q.u!=null)z.u=String(q.u)}else if(q.ch&&q.f&&q.n&&CH.some(c=>c[0]==q.ch))SK.push(mk(q.id,q.ch,q.n,q.f,String(q.u||''),q.s?{s:1}:{}))}
 await Promise.all([...new Set(SK.map(q=>q.u).filter(Boolean))].map(async u=>{for(const c of['scores','wallets']){try{const d=await db.collection(c).doc('t'+u).get(),v=d.exists&&d.data();if(v&&v.name){AU[u]={name:v.name,photo:/^https:\/\//.test(v.photo||'')?v.photo:''};return}}catch{}}}));
 ap();if(cs=='s')rsk();if(cs=='x')rbx();
 }catch{}})();
 
-// --- Админ-панель: выдача существующих скинов через документ кошелька Firestore ---
-if(IS_ADMIN){const entry=$('#adminEntry');if(entry)entry.style.display='flex'}
+// --- Расширенная админ-панель владельца ---
+let ADM_LAST=null;
+const admTarget=()=>String($('#admUid')?.value||'').trim();
+const admValid=id=>/^\d{5,15}$/.test(id);
+function admSay(message,type=''){
+ const e=$('#admStatus');if(e){e.textContent=message;e.className='adm-result '+type;}
+}
+function admPlayerCard(){
+ const w=ADM_LAST?.wallet||{},s=ADM_LAST?.score||{},own=Array.isArray(w.own)?w.own:[];
+ const id=ADM_LAST?.id||admTarget();
+ const nm=w.name||s.name||'Имя не сохранено';
+ const eq=w.eq&&typeof w.eq==='object'?w.eq:{};
+ const eqNames=Object.entries(eq).map(([ch,sid])=>{const q=sk_(sid);return q?`${q.n}`:sid}).join(' / ')||'по умолчанию';
+ const box= w.bx==null?own.length:(Number(w.bx)||0);
+ $('#admPlayerMeta').innerHTML=`<b>${esc(nm)}</b><div class="adm-statgrid"><div class="adm-stat"><span>МОНЕТЫ</span><b>${Number(w.c)||0}</b></div><div class="adm-stat"><span>РЕКОРД</span><b>${Number(s.score)||0}</b></div><div class="adm-stat"><span>СКИНОВ</span><b>${own.length}</b></div><div class="adm-stat"><span>ОТКРЫТО ЯЩИКОВ</span><b>${box}</b></div></div><p class="adm-help" style="margin-top:.55rem">ID: ${esc(id)} · Надетое: ${esc(eqNames)}</p>`;
+}
+async function adminLoadPlayer(){
+ if(!IS_ADMIN||!db){admSay('Нет доступа или Firebase не подключён.','err');return}
+ const id=admTarget();if(!admValid(id)){admSay('Введи числовой Telegram ID (5–15 цифр).','err');return}
+ admSay('Загружаю профиль…');
+ try{
+  const [w,s]=await Promise.all([db.collection('wallets').doc('t'+id).get(),db.collection('scores').doc('t'+id).get()]);
+  ADM_LAST={id,wallet:w.exists?(w.data()||{}):{},score:s.exists?(s.data()||{}):{}};
+  admPlayerCard();admSay(w.exists||s.exists?'Профиль загружен.':'Документов пока нет — можно создать профиль действиями ниже.','ok');
+ }catch(err){console.error('admin load failed',err);admSay('Не удалось прочитать профиль. Проверь права чтения Firestore.','err')}
+}
+async function adminRecent(){
+ const box=$('#admRecent');if(!box||!IS_ADMIN||!db)return;
+ box.innerHTML='<p class="adm-help">Загружаю список…</p>';
+ try{
+  const snap=await db.collection('wallets').orderBy('t','desc').limit(20).get();
+  if(!snap.size){box.innerHTML='<p class="adm-help">Пока нет сохранённых кошельков.</p>';return}
+  box.innerHTML=snap.docs.map(d=>{const v=d.data()||{},id=d.id.replace(/^t/, '');return `<button class="adm-player" data-a="admPick" data-i="${esc(id)}"><b>${esc(v.name||'Игрок без имени')}</b><span>${Number(v.c)||0} монет · ${esc(id)}</span></button>`}).join('');
+ }catch(err){console.warn('recent players unavailable',err);box.innerHTML='<p class="adm-help">Список недоступен по правилам Firebase. Игрока всё равно можно найти по ID.</p>'}
+}
 function adminPanel(){
  if(!IS_ADMIN)return;
  const opts=SK.filter(q=>!q.d).map(q=>`<option value="${esc(q.id)}">${esc(q.n)} · ${esc(q.id)}</option>`).join('');
  $('#ad').innerHTML=hdr('АДМИН-ПАНЕЛЬ')+
- `<div class="card adm-card"><div class="adm-section">ВЫДАТЬ СКИН</div>
- <p class="adm-note">Выдача добавляет скин в коллекцию игрока. По умолчанию указан твой Telegram ID.</p>
- <label class="adm-label" for="admUid">TELEGRAM ID ИГРОКА</label>
- <input class="adm-input" id="admUid" type="text" inputmode="numeric" autocomplete="off" value="${ADMIN_ID}" placeholder="Например, 7520296747">
- <label class="adm-label" for="admSkin">СКИН</label>
- <select class="adm-select" id="admSkin">${opts}</select>
- <button class="play adm-action" data-a="grant">ВЫДАТЬ СКИН</button>
- <div class="adm-result" id="admResult" aria-live="polite"></div></div>
- <div class="card adm-card"><div class="adm-section">КАК ЭТО РАБОТАЕТ</div><p class="adm-note">Скин записывается в Firebase → wallets → tTelegramID → own. При следующем обновлении игры он появится в коллекции «Скины».</p></div>`;
- scr('ad');
+ `<div class="card adm-card">
+   <div class="adm-section">ИГРОК</div><p class="adm-note">Введи Telegram ID или выбери игрока из последних сохранённых. По умолчанию указан твой аккаунт.</p>
+   <label class="adm-label" for="admUid">TELEGRAM ID</label><input class="adm-input" id="admUid" type="text" inputmode="numeric" autocomplete="off" value="${ADMIN_ID}" placeholder="7520296747">
+   <button class="play adm-action" data-a="admLoad">НАЙТИ ИГРОКА</button>
+   <div id="admPlayerMeta" class="adm-result">Нажми «Найти игрока», чтобы загрузить данные.</div>
+   <div class="adm-divider"></div><div class="adm-section">ПОСЛЕДНИЕ ИГРОКИ</div><div id="admRecent" class="adm-playerlist"><p class="adm-help">Загружаю…</p></div>
+ </div>
+ <div class="card adm-card">
+   <div class="adm-section">УПРАВЛЕНИЕ МОНЕТАМИ</div><p class="adm-note">Изменение баланса выбранного игрока. Все значения сохраняются в Firebase.</p>
+   <label class="adm-label" for="admAmount">КОЛИЧЕСТВО МОНЕТ</label><input class="adm-input" id="admAmount" type="number" inputmode="numeric" min="0" step="1" value="1000">
+   <div class="adm-grid"><button class="sec yl" data-a="admAdd">＋ ВЫДАТЬ</button><button class="sec danger" data-a="admSub">− СНЯТЬ</button><button class="sec purple" data-a="admSet">УСТАНОВИТЬ БАЛАНС</button><button class="sec" data-a="admLoad">ОБНОВИТЬ ДАННЫЕ</button></div>
+ </div>
+ <div class="card adm-card">
+   <div class="adm-section">УПРАВЛЕНИЕ СКИНАМИ</div><p class="adm-note">Можно выдать, забрать или сразу надеть любой скин из каталога.</p>
+   <label class="adm-label" for="admSkin">СКИН</label><select class="adm-select" id="admSkin">${opts}</select>
+   <div class="adm-grid"><button class="sec yl" data-a="admGrant">ВЫДАТЬ СКИН</button><button class="sec danger" data-a="admRemove">ЗАБРАТЬ СКИН</button></div>
+   <button class="play adm-action" data-a="admEquip">НАДЕТЬ ИГРОКУ</button>
+ </div>
+ <div class="card adm-card">
+   <div class="adm-section">РЕКОРД И ПРОГРЕСС</div><p class="adm-note">Меняй рекорд в таблице ТОП или сбрасывай его.</p>
+   <label class="adm-label" for="admScore">НОВЫЙ РЕКОРД</label><input class="adm-input" id="admScore" type="number" inputmode="numeric" min="0" step="1" value="0">
+   <div class="adm-grid"><button class="sec purple" data-a="admScoreSet">УСТАНОВИТЬ РЕКОРД</button><button class="sec danger" data-a="admScoreClear">СБРОСИТЬ РЕКОРД</button></div>
+   <div class="adm-divider"></div><div class="adm-section">СБРОС КОШЕЛЬКА</div><p class="adm-help">Обнулит монеты и удалит все полученные скины игрока, сбросит счётчик ящиков. Это действие нельзя отменить.</p>
+   <button class="play adm-action" style="background:#ff2d55;color:#fff;box-shadow:0 .25rem 0 #14142b" data-a="admWalletReset">СБРОСИТЬ КОШЕЛЁК</button>
+ </div>
+ <div class="card adm-card"><div class="adm-section">СТАТУС</div><p class="adm-note">Цена ящика закреплена на уровне <b>100 монет</b> и не меняется от количества открытий или настроек Firebase.</p><div class="adm-result" id="admStatus">Готово к работе.</div></div>`;
+ scr('ad');adminLoadPlayer();adminRecent();
 }
-async function grantSkin(){
- const result=$('#admResult');
- if(!IS_ADMIN||!db){if(result)result.textContent='Нет доступа или Firebase не подключён';return}
- const target=String($('#admUid')?.value||'').trim();
- const skinId=$('#admSkin')?.value;
- const q=sk_(skinId);
- if(!/^\d{5,15}$/.test(target)){result.textContent='Введи корректный числовой Telegram ID';return}
- if(!q||q.d){result.textContent='Выбери доступный скин';return}
- if(result)result.textContent='Выдаю…';
+async function adminWalletUpdate(changeFn,success){
+ if(!IS_ADMIN||!db){admSay('Нет доступа или Firebase не подключён.','err');return false}
+ const target=admTarget();if(!admValid(target)){admSay('Введи корректный Telegram ID.','err');return false}
+ admSay('Сохраняю изменения…');
  try{
-  const ref=db.collection('wallets').doc('t'+target);
-  const snap=await ref.get();
-  const old=snap.exists?(snap.data()||{}):{};
-  const own=[...new Set([...(Array.isArray(old.own)?old.own:[]),...(target===ADMIN_ID?WL.own:[])])];
-  if(own.includes(q.id)){
-   result.textContent=`У игрока уже есть «${q.n}».`;
-   return;
-  }
-  own.push(q.id);
-  let nextV=Math.max(Number(old.v)||0,target===ADMIN_ID?(Number(WL.v)||0):0)+1;
-  const data={c:Math.max(Number(old.c)||0,target===ADMIN_ID?(Number(WL.c)||0):0),v:nextV,own,eq:old.eq&&typeof old.eq==='object'?old.eq:(target===ADMIN_ID?WL.eq:{}),ch:old.ch|| (target===ADMIN_ID?WL.ch:'il'),bx:Number(old.bx)|| (target===ADMIN_ID?WL.bx:0),pt:Number(old.pt)|| (target===ADMIN_ID?WL.pt:0),t:FV.serverTimestamp()};
-  if(target===ADMIN_ID){data.name=me.name.slice(0,32);data.photo=me.photo}
-  await ref.set(data,{merge:true});
-  if(target===ADMIN_ID){
-   WL.own=own;WL.v=nextV;wd=0;
-   try{localStorage.wl=JSON.stringify(WL)}catch{}
-   cshow();if(cs==='s')rsk();if(cs==='x')rbx();
-  }
-  result.textContent=`Готово! «${q.n}» выдан игроку ${target}. ${target===ADMIN_ID?'Перезагрузи игру или открой «Скины» — скин уже в коллекции.':'Игрок увидит скин после обновления игры.'}`;
- }catch(err){
-  console.error('admin grant failed',err);
-  result.textContent='Firebase отклонил запись. Проверь Firestore Rules: запись wallets/t'+target+' должна быть разрешена.';
- }
+  const ref=db.collection('wallets').doc('t'+target);let updated=null;
+  await db.runTransaction(async tx=>{
+   const snap=await tx.get(ref),old=snap.exists?(snap.data()||{}):{};
+   const base={...old,c:Math.max(0,Number(old.c)||0),v:Math.max(0,Number(old.v)||0),own:Array.isArray(old.own)?old.own.slice():[],eq:old.eq&&typeof old.eq==='object'?{...old.eq}:{},ch:old.ch||'il',bx:Math.max(0,Number(old.bx)||0),pt:Math.max(0,Number(old.pt)||0)};
+   if(target===ADMIN_ID){base.c=Math.max(base.c,Number(WL.c)||0);base.v=Math.max(base.v,Number(WL.v)||0);base.own=[...new Set([...base.own,...(Array.isArray(WL.own)?WL.own:[])])];base.eq={...(WL.eq||{}),...base.eq};base.ch=base.ch||WL.ch||'il';base.bx=Math.max(base.bx,Number(WL.bx)||0);base.pt=Math.max(base.pt,Number(WL.pt)||0)}
+   const patch=changeFn(base)||{};
+   updated={...base,...patch,v:Math.max(base.v,target===ADMIN_ID?(Number(WL.v)||0):0)+1,t:FV.serverTimestamp()};
+   tx.set(ref,updated,{merge:true});
+  });
+  if(target===ADMIN_ID){WL={...WL,c:updated.c,v:updated.v,own:updated.own,eq:updated.eq,ch:updated.ch,bx:updated.bx,pt:updated.pt};wd=0;try{localStorage.wl=JSON.stringify(WL)}catch{}cshow();ap();if(cs==='s')rsk();if(cs==='x')rbx()}
+  await adminLoadPlayer();admSay(success||'Изменения сохранены.','ok');return true;
+ }catch(err){console.error('admin wallet update failed',err);admSay('Firebase отклонил изменение. Возможна ошибка Firestore Rules или сети. '+(err?.code||''),'err');return false}
 }
+async function adminCoins(mode){
+ const raw=Number($('#admAmount')?.value),amount=Math.floor(raw);
+ if(!Number.isFinite(raw)||raw<0||!Number.isSafeInteger(amount)){admSay('Введи целое неотрицательное число монет.','err');return}
+ await adminWalletUpdate(p=>{let c=p.c;if(mode==='add')c+=amount;else if(mode==='sub')c=Math.max(0,c-amount);else c=amount;if(!Number.isSafeInteger(c))throw new Error('balance overflow');return {c}},mode==='add'?`Выдано ${amount} монет.`:mode==='sub'?`Снято ${amount} монет (ниже нуля баланс не опускается).`:`Баланс установлен: ${amount} монет.`);
+}
+async function adminGrant(){
+ const id=$('#admSkin')?.value,q=sk_(id);if(!q||q.d){admSay('Выбери скин из списка.','err');return}
+ await adminWalletUpdate(p=>{if(p.own.includes(id))throw new Error('already-owned');return {own:[...p.own,id]}},`Скин «${q.n}» выдан игроку ${admTarget()}.`);
+}
+async function adminRemove(){
+ const id=$('#admSkin')?.value,q=sk_(id);if(!q||q.d){admSay('Выбери скин из списка.','err');return}
+ await adminWalletUpdate(p=>{if(!p.own.includes(id))throw new Error('not-owned');const eq={...p.eq};if(eq[q.ch]===id)delete eq[q.ch];return {own:p.own.filter(x=>x!==id),eq}},`Скин «${q.n}» забран у игрока ${admTarget()}.`);
+}
+async function adminEquip(){
+ const id=$('#admSkin')?.value,q=sk_(id);if(!q){admSay('Выбери скин.','err');return}
+ await adminWalletUpdate(p=>{if(!q.d&&!p.own.includes(id))throw new Error('not-owned');const eq={...p.eq,[q.ch]:id};return {eq,ch:q.ch==='bl'?p.ch:q.ch}},`Скин «${q.n}» надет игроку ${admTarget()}.`);
+}
+async function adminScore(clear=false){
+ if(!IS_ADMIN||!db){admSay('Нет доступа или Firebase не подключён.','err');return}
+ const target=admTarget();if(!admValid(target)){admSay('Введи корректный Telegram ID.','err');return}
+ try{
+  const ref=db.collection('scores').doc('t'+target);
+  if(clear){await ref.delete();admSay(`Рекорд игрока ${target} удалён из ТОП.`,'ok')}
+  else{const n=Math.floor(Number($('#admScore')?.value));if(!Number.isSafeInteger(n)||n<0){admSay('Введи целый неотрицательный рекорд.','err');return}await db.runTransaction(async tx=>{const s=await tx.get(ref),old=s.exists?(s.data()||{}):{};tx.set(ref,{...old,score:n,t:FV.serverTimestamp()},{merge:true})});admSay(`Рекорд игрока ${target} установлен: ${n}.`,'ok')}
+  await adminLoadPlayer();
+ }catch(err){console.error('admin score update failed',err);admSay('Не удалось изменить рекорд: проверь права записи в scores. '+(err?.code||''),'err')}
+}
+async function adminWalletReset(){
+ if(!confirm('Точно сбросить баланс, все скины и прогресс ящиков этого игрока?'))return;
+ await adminWalletUpdate(()=>({c:0,own:[],eq:{},ch:'il',bx:0,pt:0}),'Кошелёк игрока сброшен.');
+}
+function adminPick(id){if(!admValid(String(id||'')))return;const input=$('#admUid');if(input)input.value=String(id);adminLoadPlayer()}
 
 const rs=()=>{const r=Math.min(devicePixelRatio||1,2.5);cv.width=innerWidth*r;cv.height=innerHeight*r;K=cv.width/W;H=cv.height/K;gy=H-GH};
 addEventListener('resize',rs);rs();
@@ -674,7 +758,7 @@ cv.onpointerdown=e=>{
 };
 cv.onpointermove=e=>{if(!d||e.pointerId!=d.id)return;const v=(e.clientX-d.x)*W/innerWidth;if(Math.abs(v)>6)d.m=1;if(d.m)tx=d.p+v};
 cv.onpointerup=cv.onpointercancel=e=>{if(!d||e.pointerId!=d.id)return;if(!d.m&&performance.now()-d.t<300)parry();d=null};
-const A={go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc,admin:adminPanel,grant:grantSkin};
+const A={go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc,admin:adminPanel,admLoad:adminLoadPlayer,admPick:adminPick,admAdd:()=>adminCoins('add'),admSub:()=>adminCoins('sub'),admSet:()=>adminCoins('set'),admGrant:adminGrant,admRemove:adminRemove,admEquip:adminEquip,admScoreSet:()=>adminScore(false),admScoreClear:()=>adminScore(true),admWalletReset:adminWalletReset};
 document.onclick=e=>{if(performance.now()<lock)return;const el=e.target.closest('[data-a]');if(el)A[el.dataset.a]?.(el.dataset.i)};
 document.addEventListener('keydown',e=>{if(e.key=='Escape'||e.key=='p'||e.key=='P')st=='p'?pause():st=='pa'&&resume()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(st=='p')pause();if(ok()&&a>0)send()}else flush()});
