@@ -203,6 +203,33 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 <div class="row"><button class="sec" data-a="top">ТОП</button><button class="sec yl" data-a="shop">МАГАЗИН</button></div>
 <div class="gr"></div>
 </main>
+
+<style>
+#admin-entry{display:none;margin-top:.55rem;background:#14142b;color:#ffe600;border:2px solid #14142b;border-radius:13px;padding:.75rem;font:900 .72rem Unbounded,sans-serif;box-shadow:4px 4px 0 #5b3de0}
+#admin-panel{position:fixed;z-index:9999;inset:0;background:#47cef7;display:none;overflow:auto;padding:calc(1rem + env(safe-area-inset-top)) 1rem 1.5rem;font-family:Onest,sans-serif;color:#14142b}
+#admin-panel.show{display:block}#admin-panel .adm-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}#admin-panel h2{font:900 1rem Unbounded,sans-serif;flex:1}
+#admin-panel button,#admin-panel input{font:800 .8rem Onest,sans-serif;border:2px solid #14142b;border-radius:10px;padding:.65rem;background:#fff;color:#14142b}
+#admin-panel button{background:#ffe600}#admin-panel .adm-card{background:#fff;border:2px solid #14142b;border-radius:14px;padding:.8rem;margin:.6rem 0;box-shadow:3px 3px 0 #14142b}
+#admin-panel .adm-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}#admin-panel input{min-width:0;flex:1;width:100%}#admin-panel .adm-note{font-size:.75rem;line-height:1.4;font-weight:700;margin:.6rem 0}
+#admin-panel .adm-player{display:grid;grid-template-columns:minmax(0,1fr) 5.5rem 4.5rem;gap:.35rem;align-items:center;padding:.45rem 0;border-bottom:1px solid #ddd;font-size:.75rem}
+</style>
+<button id="admin-entry" onclick="openAdmin()">⚙ АДМИН-ПАНЕЛЬ</button>
+<section id="admin-panel"><div class="adm-head"><button onclick="closeAdmin()">← НАЗАД</button><h2>АДМИНКА</h2></div>
+<div class="adm-card"><b>Управление игроком</b><p class="adm-note">Введи Telegram ID игрока. Баланс меняется в Firebase wallets.</p><div class="adm-row"><input id="adm-id" placeholder="Telegram ID"><input id="adm-amount" type="number" placeholder="Монеты"></div><div class="adm-row" style="margin-top:.5rem"><button onclick="adminCoins(1)">+ выдать</button><button onclick="adminCoins(-1)">− снять</button><button onclick="adminRead()">ПРОВЕРИТЬ</button></div><p id="adm-status" class="adm-note"></p></div>
+<div class="adm-card"><div class="adm-row"><b style="flex:1">Игроки / кошельки</b><button onclick="adminLoad()">ОБНОВИТЬ</button></div><div id="adm-list" class="adm-note">Нажми обновить</div></div>
+<div class="adm-card"><b>Важно</b><p class="adm-note">Панель скрыта для остальных в интерфейсе. Для настоящей защиты изменений Firebase нужны Security Rules / серверная проверка; не оставляй публичные права записи на wallets.</p></div></section>
+<script>
+const ADMIN_TG_ID='7520296747';
+function isGameAdmin(){return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'')===ADMIN_TG_ID}
+function adminInit(){const b=document.getElementById('admin-entry');if(b)b.style.display=isGameAdmin()?'block':'none'}
+function openAdmin(){if(!isGameAdmin()){alert('Нет доступа');return}document.getElementById('admin-panel').classList.add('show');adminInit()}
+function closeAdmin(){document.getElementById('admin-panel').classList.remove('show')}
+async function adminRead(){if(!isGameAdmin()||!db)return;const id=document.getElementById('adm-id').value.trim();if(!id)return;const out=document.getElementById('adm-status');out.textContent='загрузка…';try{const q=await db.collection('wallets').doc('t'+id).get(),v=q.exists?q.data():{};out.textContent='Баланс: '+(Number(v.c)||0)+' монет · скинов: '+(v.own||[]).length}catch(e){out.textContent='Ошибка Firebase: '+e.message}}
+async function adminCoins(sign){if(!isGameAdmin()||!db)return;const id=document.getElementById('adm-id').value.trim(),n=Math.floor(Number(document.getElementById('adm-amount').value));const out=document.getElementById('adm-status');if(!id||!Number.isFinite(n)||n<=0){out.textContent='Укажи Telegram ID и количество монет';return}out.textContent='сохраняю…';try{const ref=db.collection('wallets').doc('t'+id);await db.runTransaction(async tr=>{const q=await tr.get(ref),v=q.exists?q.data():{};const c=Math.max(0,(Number(v.c)||0)+sign*n);tr.set(ref,{c,v:(Number(v.v)||0)+1,adminUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})});out.textContent='Готово: '+(sign>0?'выдано ':'снято ')+n+' монет';adminLoad()}catch(e){out.textContent='Не удалось: '+e.message}}
+async function adminLoad(){if(!isGameAdmin()||!db)return;const el=document.getElementById('adm-list');el.textContent='загрузка…';try{const qs=await db.collection('wallets').orderBy('c','desc').limit(30).get();el.innerHTML=qs.docs.map(d=>{const v=d.data()||{},id=d.id.replace(/^t/,'');return '<div class="adm-player"><span>'+String(v.name||id).replace(/[&<>"']/g,'')+'<br><small>'+id+'</small></span><b>'+(+v.c||0)+' 🪙</b><button onclick="document.getElementById('adm-id').value=''+id+'';adminRead()">выбрать</button></div>'}).join('')||'кошельков нет'}catch(e){el.textContent='Ошибка загрузки: '+e.message}}
+window.addEventListener('load',adminInit);setTimeout(adminInit,1500);
+</script>
+
 <section id="t" class="scr"><div class="hd"><button class="sec bk" data-a="menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>ТОП ЧАТА</h2><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">0</span></div></div><div class="L" id="L"></div><div class="gr"></div></section>
 <section id="p" class="scr"></section>
 <section id="o" class="scr"></section>
