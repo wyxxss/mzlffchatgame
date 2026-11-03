@@ -373,7 +373,7 @@ const CI=`<img class="ci" src="coin.webp" alt="">`;
 const chip=()=>`<div class="cn">${CI}<span class="cv">${WL.c}</span></div>`;
 const AU={},anm=q=>AU[q.u]?.name||q.a||'id '+q.u;
 const avt=q=>{const ph=AU[q.u]?.photo||q.ai;return `<span class="av">${esc(([...anm(q)][0]||'?').toUpperCase())}${ph?`<img src="${esc(ph)}">`:''}</span>`};
-const nav=k=>`<div class="gr"><div class="nv"><button class="sec${k=='s'?' dk':''}" data-a="shop">СКИНЫ</button><button class="sec${k=='x'?' dk':''}" data-a="boxes">ЯЩИК</button></div></div>`;
+const nav=k=>`<div class="gr"><div class="nv"><button class="sec${k=='s'?' dk':''}" data-a="shop">СКИНЫ</button><button class="sec${k=='x'?' dk':''}" data-a="boxes">ВЕЙСDROP</button></div></div>`;
 const BK='<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const hdr=h=>`<div class="hd"><button class="sec bk" data-a="menu">${BK}</button><h2>${h}</h2>${chip()}</div>`;
 const img=q=>`<img src="${esc(pic(q))}" alt="">`;
