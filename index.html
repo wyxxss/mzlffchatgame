@@ -193,6 +193,9 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 .rdy{position:relative}.rdy::after{content:"";position:absolute;top:-.4rem;right:-.3rem;width:.95rem;height:.95rem;background:var(--r);border:.18rem solid var(--k);border-radius:50%;animation:rdy 1.2s ease-in-out infinite}
 @keyframes rdy{50%{transform:scale(1.25)}}
 
+.score-sync-note{display:block!important;margin:.5rem 0!important;font:800 .78rem/1.35 Onest,sans-serif!important;color:var(--d);text-align:center}
+.score-sync-note.error{color:#b00035}
+
 /* Админ-панель владельца */
 .adm-help{font-size:.82rem;line-height:1.35;color:var(--d);margin:.25rem 0 .7rem}
 .adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.6rem}
@@ -304,6 +307,8 @@ const hc=c=>{try{T.setHeaderColor?.(c);T.setBackgroundColor?.(c)}catch{}};
 const U=T?.initDataUnsafe?.user;
 const ADMIN_ID='7520296747';
 const IS_ADMIN=!!U&&String(U.id)===ADMIN_ID;
+// The button is hidden by default in CSS; explicitly reveal it for the owner.
+if(IS_ADMIN){const entry=$('#adminEntry');if(entry){entry.style.display='inline-flex';entry.setAttribute('aria-label','Открыть админ-панель');}}
 const uid=U?'t'+U.id:(localStorage.uid||=('l'+Math.random().toString(36).slice(2,10)));
 const me={name:[U?.first_name,U?.last_name].filter(Boolean).join(' ')||'аноним',photo:/^https:\/\//.test(U?.photo_url||'')?U.photo_url:''};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
@@ -314,13 +319,46 @@ try{T.BackButton.onClick(()=>menu())}catch{}
 let db,FV,sid,sb=0;
 try{firebase.initializeApp(FB);db=firebase.firestore();FV=firebase.firestore.FieldValue;
 db.collection('scores').doc(uid).get().then(s=>{if(s.exists)sb=s.data().score}).catch(()=>{})}catch{}
-let sess=null,pf=0;
-const send=()=>{if(ok()&&a>(+localStorage.pend||0))localStorage.pend=a;flush()};
-async function flush(){const v=+localStorage.pend||0;if(!db||!v||pf)return;pf=1;
-try{if(sess)await Promise.race([sess,new Promise(r=>setTimeout(r,2500))]);
-const ref=db.collection('scores').doc(uid);
-await db.runTransaction(async t=>{const o=(await t.get(ref)).data();if(!o||v>(+o.score||0))t.set(ref,{name:me.name.slice(0,32),photo:me.photo,score:v,sid:sid||'',t:FV.serverTimestamp()})});
-sb=Math.max(sb,v);if((+localStorage.pend||0)<=v)delete localStorage.pend}catch{}pf=0}
+let sess=null,scoreFlushPromise=null,scoreRetryTimer=null,scoreRetryDelay=1200;
+const scoreNote=(message,isError=false)=>{const e=$('#scoreSyncNote');if(e){e.textContent=message;e.classList.toggle('error',!!isError)}};
+const send=()=>{
+  if(ok()&&Number.isFinite(a)&&a>0){const pending=Number(localStorage.pend)||0;if(a>pending)localStorage.pend=String(a);scoreNote('Отправляем результат в ТОП…')}
+  return flush();
+};
+async function flush(){
+  if(!db)return false;
+  if(scoreFlushPromise)return scoreFlushPromise;
+  const task=(async()=>{
+    let allSaved=true;
+    while(true){
+      const v=Number(localStorage.pend)||0;
+      if(!Number.isFinite(v)||v<=0)break;
+      try{
+        const ref=db.collection('scores').doc(uid);
+        await db.runTransaction(async tx=>{
+          const snap=await tx.get(ref),old=snap.exists?(snap.data()||{}):{};
+          if(v>(Number(old.score)||0))tx.set(ref,{...old,name:me.name.slice(0,32),photo:me.photo,score:v,sid:sid||old.sid||'',t:FV.serverTimestamp()},{merge:true});
+        });
+        // Clear only the exact value that was saved; a newer score may have arrived meanwhile.
+        if((Number(localStorage.pend)||0)<=v)localStorage.removeItem('pend');
+        sb=Math.max(sb,v);scoreRetryDelay=1200;
+        if(!(Number(localStorage.pend)||0))scoreNote('✓ Результат сохранён в ТОП');
+      }catch(err){
+        allSaved=false;console.warn('Не удалось сохранить рекорд в Firebase:',err);
+        scoreNote('Не удалось сохранить результат. Повторим автоматически при соединении.',true);
+        if(!scoreRetryTimer){scoreRetryTimer=setTimeout(()=>{scoreRetryTimer=null;flush()},scoreRetryDelay);scoreRetryDelay=Math.min(30000,scoreRetryDelay*2)}
+        break;
+      }
+    }
+    return allSaved;
+  })();
+  scoreFlushPromise=task.finally(()=>{
+    scoreFlushPromise=null;
+    // Covers a new score queued at the exact moment the previous flush was finishing.
+    if((Number(localStorage.pend)||0)>0&&!scoreRetryTimer)setTimeout(()=>flush(),0);
+  });
+  return scoreFlushPromise;
+}
 
 // --- Картинки с авто-фоллбэком ---
 const IMG={};
@@ -611,10 +649,14 @@ function resume(){
 async function showTop(){st='m';scr('t');const L=$('#L');
 if(!db){L.textContent='Firebase не подключён';return}
 L.textContent='загрузка…';
+await flush();
 try{const s=await db.collection('scores').orderBy('score','desc').limit(50).get();let i=0;
-L.innerHTML=s.docs.map(q=>{const v=q.data();i++;
-return `<div class="r${q.id==uid?' me':''}"><b>${i}</b><span class="av">${esc(([...v.name][0]||'?').toUpperCase())}${/^https:\/\//.test(v.photo)?`<img src="${esc(v.photo)}">`:''}</span><span>${esc(v.name)}</span><em>${+v.score||0}</em></div>`}).join('')||'пока пусто'}
-catch{L.textContent='не удалось загрузить'}}
+const rows=s.docs.map(q=>{const v=q.data()||{};i++;
+return `<div class="r${q.id==uid?' me':''}"><b>${i}</b><span class="av">${esc(([...(v.name||'?')][0]||'?').toUpperCase())}${/^https:\/\//.test(v.photo||'')?`<img src="${esc(v.photo)}">`:''}</span><span>${esc(v.name||'Игрок')}</span><em>${Number(v.score)||0}</em></div>`}).join('');
+const pending=Number(localStorage.pend)||0;
+L.innerHTML=(pending?'<p class="score-sync-note error">Твой результат ещё отправляется — попробуй обновить ТОП через несколько секунд.</p>':'')+(rows||'пока пусто')}
+catch(err){console.warn('top load failed',err);L.textContent='не удалось загрузить'}}
+
 
 function go(){if(a>best&&ok()){best=a;localStorage.best=a;send()}a=0;b=KEY;bo=null;ps=[];am=hl=ht=tc=bn=0;bw=3+(Math.random()*3|0);hc('#47cef7');px=tx=W/2;lives=3;wave=1;nw();bs=[];pk=[];pt=[];pp=[];rg=[];d=null;cdr=[];cdT=2.5;crun=0;
 t=tk=cd=inv=sh=fl=hj=shd=0;ck=1.5;pkT=5;hint=3.5;sid=null;
@@ -640,8 +682,10 @@ function hurt(){if(shd){shd=0;pop(px,gy-100,'ЩИТ!','#5b3de0');burst(px,gy-40,
 lives--;inv=1.3;sh=1;fl=1;hz('notificationOccurred','error');if(lives<=0)over()}
 
 function over(){st='o';d=null;hc('#47cef7');lock=performance.now()+700;const nb=a>best,q=pq();
-if(nb){best=a;localStorage.best=a}if(ok())send();
-$('#o').innerHTML=`<div class="card"><h2>РЕПОРТ<br>ОТПРАВЛЕН</h2><div class="n">${a}</div><p>${nb?'новый рекорд!':'рекорд '+best} · волна ${wave}</p><p>+${crun} монет · всего ${WL.c}</p><p class="q">«${esc(q[0])}»<br>— ${esc(q[1])}</p><button class="play" data-a="go">ЕЩЁ РАЗ</button><div class="row"><button class="sec" data-a="menu">МЕНЮ</button><button class="sec" data-a="top">ТОП</button></div></div>`;scr('o')}
+if(nb){best=a;localStorage.best=a}
+$('#o').innerHTML=`<div class="card"><h2>ИГРА<br>ОКОНЧЕНА</h2><div class="n">${a}</div><p>${nb?'новый рекорд!':'рекорд '+best} · волна ${wave}</p><p>+${crun} монет · всего ${WL.c}</p><p id="scoreSyncNote" class="score-sync-note">Отправляем результат в ТОП…</p><p class="q">«${esc(q[0])}»<br>— ${esc(q[1])}</p><button class="play" data-a="go">ЕЩЁ РАЗ</button><div class="row"><button class="sec" data-a="menu">МЕНЮ</button><button class="sec" data-a="top">ТОП</button></div></div>`;
+if(ok())send();else scoreNote('Результат не прошёл внутреннюю проверку и не отправлен.',true);
+scr('o')}
 
 function clr(){wave++;add(20);for(const o of bs)burst(o.x,o.y,'#5b3de0',5);bs=[];if(wave==bw){spawnB();return}nw();ck=2;pop(W/2,H*.4,'ВОЛНА '+wave);hz('notificationOccurred','success')}
 
@@ -762,11 +806,13 @@ const A={go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc,
 document.onclick=e=>{if(performance.now()<lock)return;const el=e.target.closest('[data-a]');if(el)A[el.dataset.a]?.(el.dataset.i)};
 document.addEventListener('keydown',e=>{if(e.key=='Escape'||e.key=='p'||e.key=='P')st=='p'?pause():st=='pa'&&resume()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(st=='p')pause();if(ok()&&a>0)send()}else flush()});
+addEventListener('online',()=>flush());
+addEventListener('pageshow',()=>{if(Number(localStorage.pend)>0)flush()});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
 // --- Цикл ---
 let l=0;
 const fr=n=>{requestAnimationFrame(fr);const dt=Math.min(.033,(n-l)/1e3||0);l=n;if(st=='p')up(dt);if(st=='p'||st=='o'||st=='pa')dr()};
-menu();requestAnimationFrame(fr);
+menu();if(Number(localStorage.pend)>0)setTimeout(()=>flush(),700);requestAnimationFrame(fr);
 })();
 </script></body></html>
