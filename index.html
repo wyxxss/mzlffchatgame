@@ -106,9 +106,9 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 #s{overflow:hidden}
 #s>*{flex:none}
 
-/* Табы персонажей — все 4 ровно в один ряд без обрезки */
-.tabs{display:flex;gap:.38rem;margin-bottom:.7rem}
-.tabs .sec{flex:1 1 auto;min-width:0;padding:.52rem .35rem;font-size:.72rem;letter-spacing:-.02em;border-radius:.95rem;box-shadow:.18rem .18rem 0 var(--k);white-space:nowrap}
+/* Табы персонажей — переносятся на второй ряд (3 + 2), чтобы не обрезаться */
+.tabs{display:flex;flex-wrap:wrap;gap:.38rem;margin-bottom:.7rem}
+.tabs .sec{flex:1 1 28%;min-width:0;padding:.52rem .35rem;font-size:.72rem;letter-spacing:-.02em;border-radius:.95rem;box-shadow:.18rem .18rem 0 var(--k);white-space:nowrap}
 .tabs .sec.yl{background:var(--y)}
 
 /* Витрина (превью скина + инфо-панель в единой карточке) */
@@ -290,7 +290,7 @@ const IM={
 };
 const COIN_SVG="data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="17" cy="17" r="13" fill="#14142b"/><circle cx="15.5" cy="15.5" r="13" fill="#ffe600" stroke="#14142b" stroke-width="3"/><circle cx="15.5" cy="15.5" r="7.5" fill="none" stroke="#e0a800" stroke-width="2.4"/><path d="M9 13.5a6.8 6.8 0 0 1 5-5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>');
 const Q=[["Я не хотел репорт кидать","blue"],["Вот это уже пиздец настоящий, умри ебанутый","артем"],["я сосу","лайтム"],["я же гомосексуалист","поля фирудо"],["ухты звучит сексуально","астма29🥀"],["я хочу подхватить вич","версушка"],["я хочу ящик говна","данилка"],["ж","ілюша, кидтр"],["я ел гавно","ілюша"]];
-// --- Скины. ch: il/ct/nc персонажи, bl шарик · u: Telegram id художника (ник и ава подтягиваются из Firebase)
+// --- Скины. ch: il/ct/nc/gb персонажи, bl шарик · u: Telegram id художника (ник и ава подтягиваются из Firebase)
 // d: стандартный скин · s: «сток» персонажа (открывает остальные его скины). Всё, кроме d, выпадает только из ящика.
 const mk=(id,ch,n,f,u,x)=>({id,ch,n,f,u,...x}),UA='8432539534',UB='7042249253',UC='7520296747',UD='7636170713',UE='8399449955',UF='7509491579';
 let SK=[
@@ -298,6 +298,7 @@ mk('il0','il','Обычный игрок','player.webp','',{d:1}),
 mk('bl0','bl','Обычный шарик','bullet.webp','',{d:1}),
 mk('ct1','ct','Котик','omled_cat_1.webp',UB,{s:1}),
 mk('nc1','nc','Нектарин','nectarin.webp','',{s:1}),
+mk('gb1','gb','Голубая','golubaya.webp','',{s:1}),
 mk('beach','il','Пляжный Ілюша','ilsuha_namore.webp',UA),
 mk('bob','il','Ілюша Боб','ilusha_bob.webp',UA),
 mk('girl','il','Ілюша-девочка','ilusha_devocka.webp',UA),
@@ -323,7 +324,7 @@ mk('ct7','ct','Котик непридумал 2','omled_cat_7.webp',UB),
 mk('ct8','ct','Котик АДХД','omled_cat_8.webp',UB),
 mk('ct9','ct','пушін','pushin.webp',UF)
 ];
-const CH=[['il','ИГРОК'],['ct','КОТИК'],['nc','НЕКТАРИН'],['bl','ШАРИК']];/* ЭКОНОМИКА (ориентир: 1 минута активной игры ≈ 20 монет)
+const CH=[['il','ИГРОК'],['ct','КОТИК'],['nc','НЕКТАРИН'],['gb','ГОЛУБАЯ'],['bl','ШАРИК']];/* ЭКОНОМИКА (ориентир: 1 минута активной игры ≈ 20 монет)
    Доход: монета в среднем 1.48 (88% по 1, 12% по 5), падает раз в ~2.4 с, ловится ~60% → ≈ 20-22 монеты/мин, плюс награда за босса 25..50.
    Ящик стоит фиксированные 100 монет. Цена не растёт и не зависит от числа открытий.
    Дубль возвращает DUP = 25% цены. После PITY = 4 дублей подряд следующий ящик гарантированно даёт новый скин.
@@ -596,7 +597,7 @@ function adminPanel(){
    <label class="adm-label" for="admNewUrl">ИЛИ ССЫЛКА НА КАРТИНКУ / ФАЙЛ</label>
    <input class="adm-input" id="admNewUrl" type="text" placeholder="или оставь пустым, если выбрал файл выше">
    <div class="adm-grid" style="margin-top:.3rem">
-     <div><label class="adm-label" for="admNewCh">КАТЕГОРИЯ</label><select class="adm-select" id="admNewCh"><option value="il">ИГРОК (Ілюша)</option><option value="ct">КОТИК</option><option value="nc">НЕКТАРИН</option><option value="bl">ШАРИК</option></select></div>
+     <div><label class="adm-label" for="admNewCh">КАТЕГОРИЯ</label><select class="adm-select" id="admNewCh"><option value="il">ИГРОК (Ілюша)</option><option value="ct">КОТИК</option><option value="nc">НЕКТАРИН</option><option value="gb">ГОЛУБАЯ</option><option value="bl">ШАРИК</option></select></div>
      <div><label class="adm-label" for="admNewId">ID СКИНА (латиница)</label><input class="adm-input" id="admNewId" type="text" placeholder="напр. il_cool"></div>
    </div>
    <label class="adm-label" for="admNewName">НАЗВАНИЕ СКИНА</label>
@@ -942,7 +943,8 @@ function djshot(auto=0){const q=D;if(!q||st!='p'||q.cd>0)return;
   if(q.am<1){if(!auto){q.cd=.35;pop(px,q.py-q.cam-95,'ЖДИ ЗАРЯД 💩','#ffe600')}return}
   q.am--;q.cd=.24;q.pu.push({x:px,y:q.py-PH,a:0});hz('impactOccurred','light')}
 function dArenaPl(q){
-  const bY=q.cam+H-68,mY=q.cam+H-188,tY=q.cam+H-308;
+  // на невысоких экранах верхняя платформа не должна оказываться на линии удара по голове босса (иначе бесконечный отскок и мгновенная смерть босса)
+  const tY=q.cam+Math.max(H-308,HT+BH*.55+66),mY=Math.max(q.cam+H-188,tY+55),bY=Math.max(q.cam+H-68,mY+55);
   return [
     {x:16,y:bY,w:96,t:0,vx:0,sp:0,ar:1},
     {x:W/2-52,y:bY-14,w:104,t:0,vx:0,sp:1,ar:1},
@@ -955,7 +957,7 @@ function dArenaPl(q){
 function dspawnB(){const q=D,m=18+6*q.bn;q.ar=1;q.lk=1;q.en=[];q.pu=[];q.bu=[];
   q.pl=dArenaPl(q);
   q.top=q.cam-60;
-  q.bo={hp:m,mx:m,ph:1,x:W/2,y:-BH,in:1.6,s:0,c:2.0,hu:0,tt:0,nh:0,rg:0,rl:0};
+  q.bo={hp:m,mx:m,ph:1,x:W/2,y:-BH,in:1.6,s:0,c:2.0,hu:0,tt:0,nh:0,rg:0,rl:0,sc:0};
   q.am=AM;q.pt=1.1;q.hint=5.5;
   if(q.py>q.cam+H-90){q.py=q.cam+H-95;q.vy=-DJV}
   sh=1;fl=1;hc('#2b0606');hz('notificationOccurred','warning');
@@ -967,7 +969,7 @@ function dfire(){const q=D.bo,p=q.ph,v=Math.min(265,145+p*24+D.bn*10),ox=q.x,oy=
   if(r==0)for(const g of[-.26,0,.26])aim(g);
   else if(r==1)for(let g=-.5;g<=.51;g+=.25)m(ox,oy,Math.sin(g)*v,Math.cos(g)*v);
   else{const g=Math.random()*5|0;for(let i=0;i<6;i++)if(i!=g&&i!=g+1)m((i+.5)*W/6,oy,0,v*.82)}}
-function dbup(dt){const q=D,o=q.bo;o.tt+=dt;o.hu-=dt;o.nh+=dt;const sp=[0,.65,.9,1.2][o.ph];
+function dbup(dt){const q=D,o=q.bo;o.tt+=dt;o.hu-=dt;o.nh+=dt;o.sc=Math.max(0,(o.sc||0)-dt);const sp=[0,.65,.9,1.2][o.ph];
   o.x=W/2+(Math.sin(o.tt*sp)*.7+Math.sin(o.tt*sp*2.1+1)*.3)*(W/2-BW/2-10);
   if(o.in>0){o.in-=dt;const u=C(1-o.in/1.6,0,1);o.y=-BH+(HT+24+BH)*(1-(1-u)*(1-u));return}
   o.y=HT+24+Math.sin(o.tt*2)*6;o.c-=dt;
@@ -996,8 +998,9 @@ function dup(dt){const q=D;t+=dt;
   if(q.lk&&q.py<q.cam+HT+BH*.55){
     if(q.bo&&q.bo.in<=0&&Math.abs(px-q.bo.x)<BW*.65){
       q.py=q.cam+HT+BH*.55;q.vy=DJV*.55;
-      if(!q.bo.s){q.bo.hp=Math.max(0,q.bo.hp-2);q.bo.hu=.35;q.ds+=35;sh=1;burst(q.bo.x,q.bo.y+BH*.7,'#ffe600',18);pop(px,HT+BH,'ПРЫЖОК В ЖБАН! -2','#ffe600');hz('impactOccurred','heavy');if(q.bo.hp<=0)dbdie()}
-      else pop(px,HT+BH,'ЩИТ БОССА!','#fff');
+      if(q.bo.sc>0){/* кулдаун: просто отскакиваем, урон и надписи не спамятся */}
+      else if(!q.bo.s){q.bo.sc=.8;q.bo.hp=Math.max(0,q.bo.hp-2);q.bo.hu=.35;q.ds+=35;sh=1;burst(q.bo.x,q.bo.y+BH*.7,'#ffe600',18);pop(px,HT+BH,'ПРЫЖОК В ЖБАН! -2','#ffe600');hz('impactOccurred','heavy');if(q.bo.hp<=0)dbdie()}
+      else{q.bo.sc=.8;pop(px,HT+BH,'ЩИТ БОССА!','#fff')}
     }else if(q.py<q.cam+PH){q.py=q.cam+PH;q.vy=Math.max(q.vy,0)}
   }
   if(q.vy>0){
@@ -1035,7 +1038,7 @@ function dup(dt){const q=D;t+=dt;
       else if(inv<=0){e.d=1;burst(e.x,e.y-q.cam,'#5b3de0');hurt()}}}
   for(const o of q.pu){o.y-=840*dt;o.a+=dt*9;const b=q.bo;if(b&&b.in<=0)o.x+=C(b.x-o.x,-340*dt,340*dt);const sy=o.y-q.cam;
     for(const e of q.en)if(!e.d&&Math.hypot(e.x-o.x,e.y-o.y)<32){e.d=o.d=1;q.ds+=10;burst(e.x,e.y-q.cam,'#7a4a2a',8);pop(e.x,sy,'+10','#14142b')}
-    if(b&&b.in<=0&&sy<b.y+BH+6&&sy>b.y-10&&Math.abs(o.x-b.x)<BW*.64){o.d=1;
+    if(b&&b.in<=0&&sy<b.y+BH+6&&sy>b.y-PH-10&&Math.abs(o.x-b.x)<BW*.64){o.d=1;
       if(b.s){pop(o.x,sy+30,'БЛОК!','#14142b');burst(o.x,sy,'#fff',6)}
       else{b.hp--;b.hu=.28;b.nh=0;b.rg=0;q.ds+=15;pop(o.x,sy+30,'+15','#ff2d55');burst(o.x,sy,'#7a4a2a',14);hz('impactOccurred','heavy');if(b.hp<=0){dbdie();break}}}
     if(sy<-30)o.d=1}
