@@ -192,6 +192,18 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 #md .dup-msg{margin:.2rem 0 .7rem;color:var(--p);font-size:.98rem}
 .rdy{position:relative}.rdy::after{content:"";position:absolute;top:-.4rem;right:-.3rem;width:.95rem;height:.95rem;background:var(--r);border:.18rem solid var(--k);border-radius:50%;animation:rdy 1.2s ease-in-out infinite}
 @keyframes rdy{50%{transform:scale(1.25)}}
+
+/* Админ-панель владельца */
+.adm-open{display:none;width:100%;margin-top:.85rem;background:#5b3de0;color:#fff;box-shadow:0 .25rem 0 #14142b}
+#ad{overflow-y:auto;gap:.75rem;touch-action:pan-y}
+#ad .adm-card{margin:0;padding:1rem}
+.adm-note{font-size:.82rem;line-height:1.35;color:var(--d);margin:.35rem 0 .75rem}
+.adm-label{display:block;font:900 .76rem Unbounded,sans-serif;margin:.55rem 0 .35rem;color:var(--k)}
+.adm-input,.adm-select{display:block;width:100%;min-height:3rem;border:.18rem solid var(--k);border-radius:.85rem;background:#f4f6fb;color:var(--k);padding:.65rem .75rem;font:800 .95rem Onest,sans-serif;outline:none;user-select:text;-webkit-user-select:text}
+.adm-action{width:100%;margin-top:.8rem}
+.adm-result{font-size:.88rem;line-height:1.35;margin-top:.7rem;min-height:1.2rem;color:var(--p);overflow-wrap:anywhere}
+.adm-section{font:900 .78rem Unbounded,sans-serif;margin-bottom:.35rem}
+
 </style></head><body>
 <canvas id="cv"></canvas>
 <main id="m" class="scr on">
@@ -201,41 +213,16 @@ small{text-align:center;margin-top:.8rem;color:var(--d);font-size:.88rem}
 <div class="sp"><img id="i1" alt=""><img id="i2" alt=""></div>
 <button class="play" data-a="go">ИГРАТЬ</button>
 <div class="row"><button class="sec" data-a="top">ТОП</button><button class="sec yl" data-a="shop">МАГАЗИН</button></div>
+<button class="sec adm-open" id="adminEntry" data-a="admin">⚙ АДМИН-ПАНЕЛЬ</button>
 <div class="gr"></div>
 </main>
-
-<style>
-#admin-entry{display:none;margin-top:.55rem;background:#14142b;color:#ffe600;border:2px solid #14142b;border-radius:13px;padding:.75rem;font:900 .72rem Unbounded,sans-serif;box-shadow:4px 4px 0 #5b3de0}
-#admin-panel{position:fixed;z-index:9999;inset:0;background:#47cef7;display:none;overflow:auto;padding:calc(1rem + env(safe-area-inset-top)) 1rem 1.5rem;font-family:Onest,sans-serif;color:#14142b}
-#admin-panel.show{display:block}#admin-panel .adm-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem}#admin-panel h2{font:900 1rem Unbounded,sans-serif;flex:1}
-#admin-panel button,#admin-panel input{font:800 .8rem Onest,sans-serif;border:2px solid #14142b;border-radius:10px;padding:.65rem;background:#fff;color:#14142b}
-#admin-panel button{background:#ffe600}#admin-panel .adm-card{background:#fff;border:2px solid #14142b;border-radius:14px;padding:.8rem;margin:.6rem 0;box-shadow:3px 3px 0 #14142b}
-#admin-panel .adm-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}#admin-panel input{min-width:0;flex:1;width:100%}#admin-panel .adm-note{font-size:.75rem;line-height:1.4;font-weight:700;margin:.6rem 0}
-#admin-panel .adm-player{display:grid;grid-template-columns:minmax(0,1fr) 5.5rem 4.5rem;gap:.35rem;align-items:center;padding:.45rem 0;border-bottom:1px solid #ddd;font-size:.75rem}
-</style>
-<button id="admin-entry" onclick="openAdmin()">⚙ АДМИН-ПАНЕЛЬ</button>
-<section id="admin-panel"><div class="adm-head"><button onclick="closeAdmin()">← НАЗАД</button><h2>АДМИНКА</h2></div>
-<div class="adm-card"><b>Управление игроком</b><p class="adm-note">Введи Telegram ID игрока. Баланс меняется в Firebase wallets.</p><div class="adm-row"><input id="adm-id" placeholder="Telegram ID"><input id="adm-amount" type="number" placeholder="Монеты"></div><div class="adm-row" style="margin-top:.5rem"><button onclick="adminCoins(1)">+ выдать</button><button onclick="adminCoins(-1)">− снять</button><button onclick="adminRead()">ПРОВЕРИТЬ</button></div><p id="adm-status" class="adm-note"></p></div>
-<div class="adm-card"><div class="adm-row"><b style="flex:1">Игроки / кошельки</b><button onclick="adminLoad()">ОБНОВИТЬ</button></div><div id="adm-list" class="adm-note">Нажми обновить</div></div>
-<div class="adm-card"><b>Важно</b><p class="adm-note">Панель скрыта для остальных в интерфейсе. Для настоящей защиты изменений Firebase нужны Security Rules / серверная проверка; не оставляй публичные права записи на wallets.</p></div></section>
-<script>
-const ADMIN_TG_ID='7520296747';
-function isGameAdmin(){return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'')===ADMIN_TG_ID}
-function adminInit(){const b=document.getElementById('admin-entry');if(b)b.style.display=isGameAdmin()?'block':'none'}
-function openAdmin(){if(!isGameAdmin()){alert('Нет доступа');return}document.getElementById('admin-panel').classList.add('show');adminInit()}
-function closeAdmin(){document.getElementById('admin-panel').classList.remove('show')}
-async function adminRead(){if(!isGameAdmin()||!db)return;const id=document.getElementById('adm-id').value.trim();if(!id)return;const out=document.getElementById('adm-status');out.textContent='загрузка…';try{const q=await db.collection('wallets').doc('t'+id).get(),v=q.exists?q.data():{};out.textContent='Баланс: '+(Number(v.c)||0)+' монет · скинов: '+(v.own||[]).length}catch(e){out.textContent='Ошибка Firebase: '+e.message}}
-async function adminCoins(sign){if(!isGameAdmin()||!db)return;const id=document.getElementById('adm-id').value.trim(),n=Math.floor(Number(document.getElementById('adm-amount').value));const out=document.getElementById('adm-status');if(!id||!Number.isFinite(n)||n<=0){out.textContent='Укажи Telegram ID и количество монет';return}out.textContent='сохраняю…';try{const ref=db.collection('wallets').doc('t'+id);await db.runTransaction(async tr=>{const q=await tr.get(ref),v=q.exists?q.data():{};const c=Math.max(0,(Number(v.c)||0)+sign*n);tr.set(ref,{c,v:(Number(v.v)||0)+1,adminUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})});out.textContent='Готово: '+(sign>0?'выдано ':'снято ')+n+' монет';adminLoad()}catch(e){out.textContent='Не удалось: '+e.message}}
-async function adminLoad(){if(!isGameAdmin()||!db)return;const el=document.getElementById('adm-list');el.textContent='загрузка…';try{const qs=await db.collection('wallets').orderBy('c','desc').limit(30).get();el.innerHTML=qs.docs.map(d=>{const v=d.data()||{},id=d.id.replace(/^t/,'');return '<div class="adm-player"><span>'+String(v.name||id).replace(/[&<>"']/g,'')+'<br><small>'+id+'</small></span><b>'+(+v.c||0)+' 🪙</b><button onclick="document.getElementById('adm-id').value=''+id+'';adminRead()">выбрать</button></div>'}).join('')||'кошельков нет'}catch(e){el.textContent='Ошибка загрузки: '+e.message}}
-window.addEventListener('load',adminInit);setTimeout(adminInit,1500);
-</script>
-
 <section id="t" class="scr"><div class="hd"><button class="sec bk" data-a="menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>ТОП ЧАТА</h2><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">0</span></div></div><div class="L" id="L"></div><div class="gr"></div></section>
 <section id="p" class="scr"></section>
 <section id="o" class="scr"></section>
 <section id="s" class="scr"></section>
 <section id="x" class="scr"></section>
 <section id="md" class="scr"></section>
+<section id="ad" class="scr"></section>
 <script>
 (()=>{
 const IM={
@@ -297,6 +284,8 @@ try{T.ready();T.expand();T.disableVerticalSwipes?.();T.setHeaderColor?.('#47cef7
 const hz=(f,k)=>{try{T.HapticFeedback[f](k)}catch{}};
 const hc=c=>{try{T.setHeaderColor?.(c);T.setBackgroundColor?.(c)}catch{}};
 const U=T?.initDataUnsafe?.user;
+const ADMIN_ID='7520296747';
+const IS_ADMIN=!!U&&String(U.id)===ADMIN_ID;
 const uid=U?'t'+U.id:(localStorage.uid||=('l'+Math.random().toString(36).slice(2,10)));
 const me={name:[U?.first_name,U?.last_name].filter(Boolean).join(' ')||'аноним',photo:/^https:\/\//.test(U?.photo_url||'')?U.photo_url:''};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
@@ -446,11 +435,63 @@ await Promise.all([...new Set(SK.map(q=>q.u).filter(Boolean))].map(async u=>{for
 ap();if(cs=='s')rsk();if(cs=='x')rbx();
 }catch{}})();
 
+// --- Админ-панель: выдача существующих скинов через документ кошелька Firestore ---
+if(IS_ADMIN){const entry=$('#adminEntry');if(entry)entry.style.display='flex'}
+function adminPanel(){
+ if(!IS_ADMIN)return;
+ const opts=SK.filter(q=>!q.d).map(q=>`<option value="${esc(q.id)}">${esc(q.n)} · ${esc(q.id)}</option>`).join('');
+ $('#ad').innerHTML=hdr('АДМИН-ПАНЕЛЬ')+
+ `<div class="card adm-card"><div class="adm-section">ВЫДАТЬ СКИН</div>
+ <p class="adm-note">Выдача добавляет скин в коллекцию игрока. По умолчанию указан твой Telegram ID.</p>
+ <label class="adm-label" for="admUid">TELEGRAM ID ИГРОКА</label>
+ <input class="adm-input" id="admUid" type="text" inputmode="numeric" autocomplete="off" value="${ADMIN_ID}" placeholder="Например, 7520296747">
+ <label class="adm-label" for="admSkin">СКИН</label>
+ <select class="adm-select" id="admSkin">${opts}</select>
+ <button class="play adm-action" data-a="grant">ВЫДАТЬ СКИН</button>
+ <div class="adm-result" id="admResult" aria-live="polite"></div></div>
+ <div class="card adm-card"><div class="adm-section">КАК ЭТО РАБОТАЕТ</div><p class="adm-note">Скин записывается в Firebase → wallets → tTelegramID → own. При следующем обновлении игры он появится в коллекции «Скины».</p></div>`;
+ scr('ad');
+}
+async function grantSkin(){
+ const result=$('#admResult');
+ if(!IS_ADMIN||!db){if(result)result.textContent='Нет доступа или Firebase не подключён';return}
+ const target=String($('#admUid')?.value||'').trim();
+ const skinId=$('#admSkin')?.value;
+ const q=sk_(skinId);
+ if(!/^\d{5,15}$/.test(target)){result.textContent='Введи корректный числовой Telegram ID';return}
+ if(!q||q.d){result.textContent='Выбери доступный скин';return}
+ if(result)result.textContent='Выдаю…';
+ try{
+  const ref=db.collection('wallets').doc('t'+target);
+  const snap=await ref.get();
+  const old=snap.exists?(snap.data()||{}):{};
+  const own=[...new Set([...(Array.isArray(old.own)?old.own:[]),...(target===ADMIN_ID?WL.own:[])])];
+  if(own.includes(q.id)){
+   result.textContent=`У игрока уже есть «${q.n}».`;
+   return;
+  }
+  own.push(q.id);
+  let nextV=Math.max(Number(old.v)||0,target===ADMIN_ID?(Number(WL.v)||0):0)+1;
+  const data={c:Math.max(Number(old.c)||0,target===ADMIN_ID?(Number(WL.c)||0):0),v:nextV,own,eq:old.eq&&typeof old.eq==='object'?old.eq:(target===ADMIN_ID?WL.eq:{}),ch:old.ch|| (target===ADMIN_ID?WL.ch:'il'),bx:Number(old.bx)|| (target===ADMIN_ID?WL.bx:0),pt:Number(old.pt)|| (target===ADMIN_ID?WL.pt:0),t:FV.serverTimestamp()};
+  if(target===ADMIN_ID){data.name=me.name.slice(0,32);data.photo=me.photo}
+  await ref.set(data,{merge:true});
+  if(target===ADMIN_ID){
+   WL.own=own;WL.v=nextV;wd=0;
+   try{localStorage.wl=JSON.stringify(WL)}catch{}
+   cshow();if(cs==='s')rsk();if(cs==='x')rbx();
+  }
+  result.textContent=`Готово! «${q.n}» выдан игроку ${target}. ${target===ADMIN_ID?'Перезагрузи игру или открой «Скины» — скин уже в коллекции.':'Игрок увидит скин после обновления игры.'}`;
+ }catch(err){
+  console.error('admin grant failed',err);
+  result.textContent='Firebase отклонил запись. Проверь Firestore Rules: запись wallets/t'+target+' должна быть разрешена.';
+ }
+}
+
 const rs=()=>{const r=Math.min(devicePixelRatio||1,2.5);cv.width=innerWidth*r;cv.height=innerHeight*r;K=cv.width/W;H=cv.height/K;gy=H-GH};
 addEventListener('resize',rs);rs();
 
 // --- Экраны ---
-const scr=i=>{wsync();cshow();cs=i;mc();try{['t','s','x'].includes(i)?T.BackButton.show():T.BackButton.hide();i=='g'?T.enableClosingConfirmation():T.disableClosingConfirmation()}catch{}['m','t','o','p','s','x'].forEach(n=>$('#'+n).classList.toggle('on',n==i));cv.style.display=i=='g'||i=='o'||i=='p'?'block':'none'};
+const scr=i=>{wsync();cshow();cs=i;mc();try{['t','s','x'].includes(i)?T.BackButton.show():T.BackButton.hide();i=='g'?T.enableClosingConfirmation():T.disableClosingConfirmation()}catch{}['m','t','o','p','s','x','ad'].forEach(n=>$('#'+n).classList.toggle('on',n==i));cv.style.display=i=='g'||i=='o'||i=='p'?'block':'none'};
 const pq=()=>{let i;do i=Math.random()*Q.length|0;while(Q.length>1&&i==+localStorage.lq);localStorage.lq=i;return Q[i]};
 const menu=()=>{if(a>best&&ok()){best=a;localStorage.best=a;send()}flush();st='m';bo=null;ht=hl=0;hc('#47cef7');const q=pq();$('#qt').textContent='«'+q[0]+'»';$('#qn').textContent=q[1];scr('m')};
 
@@ -633,7 +674,7 @@ cv.onpointerdown=e=>{
 };
 cv.onpointermove=e=>{if(!d||e.pointerId!=d.id)return;const v=(e.clientX-d.x)*W/innerWidth;if(Math.abs(v)>6)d.m=1;if(d.m)tx=d.p+v};
 cv.onpointerup=cv.onpointercancel=e=>{if(!d||e.pointerId!=d.id)return;if(!d.m&&performance.now()-d.t<300)parry();d=null};
-const A={go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc};
+const A={go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc,admin:adminPanel,grant:grantSkin};
 document.onclick=e=>{if(performance.now()<lock)return;const el=e.target.closest('[data-a]');if(el)A[el.dataset.a]?.(el.dataset.i)};
 document.addEventListener('keydown',e=>{if(e.key=='Escape'||e.key=='p'||e.key=='P')st=='p'?pause():st=='pa'&&resume()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(st=='p')pause();if(ok()&&a>0)send()}else flush()});
