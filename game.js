@@ -590,7 +590,7 @@ catch(err){console.warn('top load failed',err);L.textContent='не удалос�
 
 
 function go(){WL.gm=(WL.gm|0)+1;D=null;if(a>best&&ok()){best=a;localStorage.best=a;send()}a=0;b=KEY;bo=null;ps=[];am=hl=ht=tc=bn=0;bw=3+(Math.random()*3|0);hc(BG);px=tx=W/2;lives=3;wave=1;nw();bs=[];pk=[];pt=[];pp=[];rg=[];d=null;cdr=[];cdT=2.5;crun=0;
-t=tk=cd=inv=sh=fl=hj=shd=0;ck=1.5;pkT=5;hint=3.5;sid=null;PK={rad:0,cdn:0,dmg:0,mag:0,hp:0,aeg:0};pc=0;sw=0;LM=3+(WLV()>=5?1:0);lives=LM;shd=WLV()>=3?1:0;
+t=tk=cd=inv=sh=fl=hj=shd=0;ck=1.5;pkT=5;hint=3.5;sid=null;PK={rad:0,cdn:0,dmg:0,mag:0,hp:0,aeg:0};pc=0;sw=0;LM=3;lives=LM;shd=WLV()>=3?1:0;
 flush();sess=null;try{sess=db?.collection('sessions').add({uid,t:FV.serverTimestamp()}).then(r=>{sid=r.id}).catch(()=>{})}catch{}
 st='p';l=performance.now();scr('g')}
 const nw=()=>{hmax=hhp=Math.min(14,4+2*wave)};
@@ -604,9 +604,9 @@ else if(p==1)for(let i=0;i<3;i++)m(R(20,W-20),-10-i*55,0,v*R(.8,1.1));
 else if(p==2)for(const g of[-.4,0,.4])m(ox,oy,Math.sin(g)*v,Math.cos(g)*v);
 else{const g=Math.random()*7|0;for(let i=0;i<8;i++)if(i!=g&&i!=g+1)m((i+.5)*W/8,oy,0,v*.8)}}
 
-function parry(){if(cd>0||st!='p')return;cd=PCD();sw=.22;const cy=gy-PH*.5;rg.push({x:px,y:cy,r:10});hz('impactOccurred','medium');let n=0;
+function parry(){if(cd>0||st!='p')return;sw=.22;const cy=gy-PH*.5;rg.push({x:px,y:cy,r:10});hz('impactOccurred','medium');let n=0;
 for(const o of bs)if(!o.f&&Math.hypot(o.x-px,o.y-cy)<PR()){n++;if(bo){o.d=1;burst(o.x,o.y,'#7a4a2a',6)}else{o.f=1;o.dm=PDM()}}
-if(n&&bo){am=Math.min(AM,am+n);add(2*n)}if(n&&PK.aeg&&(pc+=n)>=6-PK.aeg){pc=0;shd=1;pop(px,gy-130,'КОНТР-ЩИТ','#5b3de0')}
+cd=PCD()*(n?1:1.7);if(n&&bo){am=Math.min(AM,am+n);add(2*n)}if(n&&PK.aeg&&!shd&&(pc+=n)>=12-2*PK.aeg){pc=0;shd=1;pop(px,gy-130,'КОНТР-ЩИТ','#5b3de0')}
 if(n)pop(px,gy-110,bo?'ГОВНО +'+n:n>1?'x'+n+'!':'ОТБИТО!','#5b3de0')}
 
 function hurt(){if(shd){shd=0;pop(px,gy-100,'ЩИТ!','#5b3de0');burst(px,gy-40,'#5b3de0');return}
@@ -631,7 +631,7 @@ if(r==0)for(const g of[-.28,0,.28])aim(g);
 else if(r==1)for(let g=-.6;g<.7;g+=.3)m(ox,oy,Math.sin(g)*v,Math.cos(g)*v);
 else if(r==2)for(let i=0;i<6;i++)m(R(20,W-20),-10-i*45,0,v);
 else{const g=Math.random()*7|0;for(let i=0;i<8;i++)if(i!=g&&i!=g+1)m((i+.5)*W/8,oy,0,v*.8)}}
-function bdie(){const q=bo,s=500+250*bn,cb=25+5*Math.min(bn,5);bn++;add(s);WL.bk=(WL.bk|0)+1;cadd(cb);for(const o of bs)burst(o.x,o.y,'#ffe600',4);bs=[];ps=[];for(const o of pk)if(o.k==4)o.k=0;burst(q.x,q.y+70,'#ffe600',40);burst(q.x,q.y+70,'#ff2d55',30);pop(W/2,H*.35,'АРТЁМ ВСЁ! +'+s,'#ff2d55');pop(W/2,H*.35+34,'+'+cb+' МОНЕТ','#e0a800');bo=null;ht=0;hc(BG);if(lives<LM)lives++;bw=wave+4;nw();ck=2.5;sh=1;hz('notificationOccurred','success');zcards()}
+function bdie(){const q=bo,s=500+250*Math.min(bn,6),cb=25+5*Math.min(bn,5);bn++;add(s);WL.bk=(WL.bk|0)+1;cadd(cb);for(const o of bs)burst(o.x,o.y,'#ffe600',4);bs=[];ps=[];for(const o of pk)if(o.k==4)o.k=0;burst(q.x,q.y+70,'#ffe600',40);burst(q.x,q.y+70,'#ff2d55',30);pop(W/2,H*.35,'АРТЁМ ВСЁ! +'+s,'#ff2d55');pop(W/2,H*.35+34,'+'+cb+' МОНЕТ','#e0a800');bo=null;ht=0;hc(BG);if(lives<LM)lives++;bw=wave+4;nw();ck=2.5;sh=1;hz('notificationOccurred','success');zcards()}
 function bup(dt){const q=bo;q.tt+=dt;q.hu-=dt;q.nh+=dt;const sp=[0,.7,1,1.35][q.ph];
 q.x=W/2+(Math.sin(q.tt*sp)*.7+Math.sin(q.tt*sp*2.3+1)*.3)*(W/2-BW/2-6);
 if(q.in>0){q.in-=dt;const u=C(1-q.in/1.8,0,1);q.y=-BH+(HT+BH)*(1-(1-u)*(1-u));return}
@@ -664,7 +664,7 @@ for(const o of bs){
 if(o.f){const dx=hx-o.x,dy=HT+HH/2-o.y,l=Math.hypot(dx,dy)||1,w=Math.min(1,dt*6);
 o.vx+=(dx/l*520-o.vx)*w;o.vy+=(dy/l*520-o.vy)*w;
 if(l<44){o.d=1;hhp-=o.dm||1;add(3);hj=.3;burst(o.x,o.y,'#ffe600',12);hz('impactOccurred','heavy');if(hhp<=0)kill=1}}
-o.x+=o.vx*dt;o.y+=o.vy*dt;o.a+=dt*3;if(o.f&&WP().sw)for(const z of bs)if(!z.f&&!z.d&&Math.hypot(z.x-o.x,z.y-o.y)<30){z.d=1;burst(z.x,z.y,'#ff8a00',6);add(2)}
+o.x+=o.vx*dt;o.y+=o.vy*dt;o.a+=dt*3;if(o.f&&WP().sw)for(const z of bs)if(!z.f&&!z.d&&Math.hypot(z.x-o.x,z.y-o.y)<30){z.d=1;burst(z.x,z.y,'#ff8a00',6)}
 if(!o.f&&!o.d&&inv<=0&&Math.hypot(o.x-px,o.y-cy)<o.r+22){o.d=1;burst(o.x,o.y,'#5b3de0');hurt()}
 if(o.y>H+40||o.x<-40||o.x>W+40||o.y<-250)o.d=1}
 bs=bs.filter(o=>!o.d);
@@ -675,7 +675,7 @@ if(o.k==4){am=Math.min(AM,am+2);pop(px,gy-100,'ГОВНО +2','#7a4a2a')}else if
 if(o.y>H+20)o.d=1}
 pk=pk.filter(o=>!o.d);
 cdT-=dt;if(cdT<=0){const big=Math.random()<CD.big;cdr.push({x:R(30,W-30),y:-20,v:big?CD.vb:CD.v,big,vy:R(...CD.spd),ph:R(0,6)});cdT=R(...CD.gap)*(bo?1.5:1)}
-for(const o of cdr){o.y+=o.vy*dt;if(PK.mag){const gx_=px-o.x,gy_=cy-o.y,ll=Math.hypot(gx_,gy_)||1;if(ll<40+55*PK.mag){o.x+=gx_/ll*280*dt;o.y+=gy_/ll*280*dt}}if(Math.hypot(o.x-px,o.y-cy)<(o.big?42:36)){o.d=1;cadd(o.v);pop(o.x,o.y-10,'+'+o.v,'#e0a800');burst(o.x,o.y,'#ffe600',o.big?10:5);hz('impactOccurred','light')}if(o.y>H+20)o.d=1}
+for(const o of cdr){o.y+=o.vy*dt;if(PK.mag){const gx_=px-o.x,gy_=cy-o.y,ll=Math.hypot(gx_,gy_)||1;if(ll<40+25*PK.mag){o.x+=gx_/ll*200*dt;o.y+=gy_/ll*200*dt}}if(Math.hypot(o.x-px,o.y-cy)<(o.big?42:36)){o.d=1;cadd(o.v);pop(o.x,o.y-10,'+'+o.v,'#e0a800');burst(o.x,o.y,'#ffe600',o.big?10:5);hz('impactOccurred','light')}if(o.y>H+20)o.d=1}
 cdr=cdr.filter(o=>!o.d);
 for(const o of pt){o.l-=dt;o.x+=o.vx*dt;o.y+=o.vy*dt;o.vy+=600*dt}pt=pt.filter(o=>o.l>0);
 for(const o of pp){o.l-=dt;o.y-=40*dt}pp=pp.filter(o=>o.l>0);
@@ -734,7 +734,7 @@ async function dflush(){if(!db)return;const v=Number(localStorage.pendd)||0;if(v
 function djstart(){
   WL.gm=(WL.gm|0)+1;
   if(a>best&&ok()){best=a;localStorage.best=a;send()}
-  a=0;b=KEY;bo=null;ps=[];hc(BG);px=tx=W/2;lives=3;bs=[];pk=[];pt=[];pp=[];rg=[];d=null;crun=0;t=0;inv=sh=fl=shd=0;
+  a=0;b=KEY;bo=null;ps=[];hc(BG);px=tx=W/2;lives=3;LM=3;PK={rad:0,cdn:0,dmg:0,mag:0,hp:0,aeg:0};bs=[];pk=[];pt=[];pp=[];rg=[];d=null;crun=0;t=0;inv=sh=fl=shd=0;
   D={cam:0,g0:gy,py:gy,vy:-DJV,top:gy,pl:[],it:[],en:[],pu:[],bu:[],mx:0,ds:0,nb:1000,bn:0,bo:null,ar:0,lk:0,gr:1,am:3,cd:0,rk:0,mg:0,hl:0,hint:4,lt:0,ms:0,tl:0,sq:0,vx:0,cb:0};
   dpl();st='p';l=performance.now();scr('g')}
 function dpl(){const q=D;
@@ -789,7 +789,7 @@ function dbup(dt){const q=D,o=q.bo;o.tt+=dt;o.hu-=dt;o.nh+=dt;o.sc=Math.max(0,(o
   q.pt-=dt;if(q.pt<=0){q.pt=1.85;const p=q.pl[Math.random()*q.pl.length|0];if(p&&q.it.length<5){const u=Math.random();q.it.push({k:u<.68?'p':u<.86?'s':(lives<LM?'h':'p'),x:p.x+p.w/2,y:p.y-38,ph:R(0,6)})}}
   if(q.pl.length<6)q.pl=dArenaPl(q)}
 function dbdie(){const q=D,o=q.bo,cb=30+5*Math.min(q.bn,5);
-  q.ds+=500+250*q.bn;q.bn++;WL.bk=(WL.bk|0)+1;cadd(cb);burst(o.x,o.y+70,'#ffe600',40);burst(o.x,o.y+70,'#ff2d55',30);
+  q.ds+=500+250*Math.min(q.bn,6);q.bn++;WL.bk=(WL.bk|0)+1;cadd(cb);burst(o.x,o.y+70,'#ffe600',40);burst(o.x,o.y+70,'#ff2d55',30);
   q.bu=[];q.bo=null;q.ar=0;q.lk=0;q.rk=1.8;q.nb=q.mx+1600+500*q.bn;
   q.top=q.cam+H-120;dpl();
   if(lives<LM)lives++;shd=1;hc(BG);hz('notificationOccurred','success');
@@ -1043,17 +1043,17 @@ cv.onpointermove=e=>{if(!d||e.pointerId!=d.id)return;const v=(e.clientX-d.x)*W/i
 cv.onpointerup=cv.onpointercancel=e=>{if(!d||e.pointerId!=d.id)return;if(!d.m&&performance.now()-d.t<340)(D?djshot():parry());d=null};
 
 // ===== ОРУЖИЕ: у каждого свой уровень 1-5 =====
-/* Уровень: +6% радиуса и −5% паузы за каждый. Ур.3 — старт со щитом, ур.5 — +1 макс. жизнь. Цена апа: 150/300/500/800 (≈1950 = 1.6 ч игры). */
+/* Уровень: +3% радиуса и −3% паузы за каждый. Ур.3 — старт со щитом. Цена апа: 150/300/500/800. */
 const WS={palm:'w_palm.webp',racket:'w_racket.webp',hammer:'w_hammer.webp',slip:'w_slip.webp'},WPV={"palm": [0.475, 0.97], "racket": [0.438, 0.97], "hammer": [0.385, 0.97], "slip": [0.506, 0.97]};
-const WPN={palm:{n:'Ладонь',p:0,r:1,c:1,d:0,t:'Классика. Ничего лишнего.'},racket:{n:'Ракетка',p:250,r:1,c:1,d:0,sw:1,t:'Отбитый шар сбивает другие шары по пути'},hammer:{n:'Кувалда',p:500,r:1,c:1.6,d:1,t:'Удар ×2 урона, но пауза дольше'},slip:{n:'Тапок',p:350,r:.65,c:.35,d:0,t:'Мелкий радиус, зато бьёшь почти без пауз'}};
-const WC=[150,300,500,800],WMS=[[3,'щит на старте'],[5,'+1 жизнь']];
+const WPN={palm:{n:'Ладонь',p:0,r:1,c:1,d:0,t:'Классика. Ничего лишнего.'},racket:{n:'Ракетка',p:250,r:1,c:1,d:0,sw:1,t:'Отбитый шар сбивает другие шары по пути'},hammer:{n:'Кувалда',p:500,r:1,c:1.6,d:1,t:'Удар ×2 урона, но пауза дольше'},slip:{n:'Тапок',p:350,r:.65,c:.55,d:0,t:'Мелкий радиус, зато бьёшь почти без пауз'}};
+const WC=[150,300,500,800],WMS=[[3,'щит на старте']];
 const WI={};for(const k in WS){const m=new Image();m.src=WS[k];WI[k]=m}
-const WV=k=>Math.min(5,(WL.wv||{})[k]|0||1),WR=k=>WPN[k].r*(1+.06*(WV(k)-1)),WZ=k=>WPN[k].c*(1-.05*(WV(k)-1));
+const WV=k=>Math.min(5,(WL.wv||{})[k]|0||1),WR=k=>WPN[k].r*(1+.03*(WV(k)-1)),WZ=k=>WPN[k].c*(1-.03*(WV(k)-1));
 const WK=()=>{const k=WL.we;return WPN[k]&&(k=='palm'||(WL.wp||[]).includes(k))?k:'palm'},WP=()=>WPN[WK()],WLV=()=>WV(WK());
 let PK={rad:0,cdn:0,dmg:0,mag:0,hp:0,aeg:0},pc=0,LM=3,sw=0,AS=null;
-const PR=()=>95*WR(WK())*(1+.25*PK.rad),PCD=()=>Math.max(.12,.8*WZ(WK())*(1-.2*PK.cdn)),PDM=()=>1+WP().d+PK.dmg;
+const PR=()=>Math.min(125,95*WR(WK())*(1+.1*PK.rad)),PCD=()=>Math.max(.3,.8*WZ(WK())*(1-.08*PK.cdn)),PDM=()=>1+WP().d+PK.dmg;
 function WDR(){const k=WK(),m=WI[k];if(!(m&&m.complete&&m.naturalWidth))return;const u=Math.max(0,sw/.22),h=50*SKS/1.16,w=h*m.naturalWidth/m.naturalHeight,v=WPV[k];x.save();x.translate(px+PW*SKS*.52,gy-PH*SKS*.36);x.rotate(.35-u*1.8);x.drawImage(m,-w*v[0],-h*v[1],w,h);x.restore()}
-const PKL={rad:['Широкая ладонь','радиус парри +25%'],cdn:['Быстрые руки','пауза между парри −20%'],dmg:['Тяжёлый удар','+1 урон по врагу и боссу'],mag:['Магнит','монеты тянутся к тебе'],hp:['Запасное сердце','+1 макс. жизнь и лечит её'],aeg:['Контр-щит','каждые несколько отбитых шаров — щит']},PKM={rad:3,cdn:3,dmg:2,mag:3,hp:2,aeg:3};
+const PKL={rad:['Широкая ладонь','радиус парри +10%'],cdn:['Быстрые руки','пауза между парри −8%'],dmg:['Тяжёлый удар','+1 урон по врагу и боссу'],mag:['Магнит','монеты тянутся к тебе'],hp:['Запасное сердце','+1 макс. жизнь и лечит её'],aeg:['Контр-щит','каждые несколько отбитых шаров — щит']},PKM={rad:2,cdn:2,dmg:1,mag:2,hp:1,aeg:2};
 function zcards(){const L=Object.keys(PKL).filter(k=>PK[k]<PKM[k]);for(let i=L.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[L[i],L[j]]=[L[j],L[i]]}const c=L.slice(0,3);if(!c.length)return;st='c';d=null;lock=performance.now()+350;hz('notificationOccurred','success');
 mo(`<div class="card pkc"><h2>УЛУЧШЕНИЕ</h2><p>выбери одно · только на этот забег</p>${c.map(k=>`<button class="pk" data-a="zpick" data-i="${k}"><b>${PKL[k][0]}</b><span>${PKL[k][1]}</span><em>${'●'.repeat(PK[k]+1)}${'○'.repeat(PKM[k]-PK[k]-1)}</em></button>`).join('')}</div>`)}
 function zpick(k){if(st!='c'||!PKL[k])return;PK[k]++;if(k=='hp'){LM++;lives=Math.min(LM,lives+1)}if(k=='aeg')pc=0;hz('impactOccurred','medium');mc();st='p';pop(px,gy-110,PKL[k][0].toUpperCase(),'#c3ff00')}
@@ -1062,7 +1062,7 @@ $('#ar').innerHTML=hdr('ОРУЖИЕ')+`<div class="wg">${Object.keys(WPN).map(z
 <div class="card wd"><div class="wdh"><div class="wpl"><img src="${WS[q]}" alt=""></div><div class="wdt"><h3>${w.n}</h3><p>${w.t}</p></div></div>
 <div class="wst"><em>радиус ${Math.round(WR(q)*100)}%</em><em>пауза ${Math.round(WZ(q)*100)}%</em><em>урон ${1+w.d}</em></div>
 <div class="wlv"><span>УРОВЕНЬ ${lv} из 5</span><i class="pips">${[1,2,3,4,5].map(n=>`<u${n<=lv?' class="on"':''}></u>`).join('')}</i></div>
-<p class="wnx">${!o?'купи оружие, чтобы прокачивать':mx?'максимальный уровень':'след. ур.: радиус +6%, пауза −5%'+(ms?' · '+ms[1]:'')}</p>
+<p class="wnx">${!o?'купи оружие, чтобы прокачивать':mx?'максимальный уровень':'след. ур.: радиус +3%, пауза −3%'+(ms?' · '+ms[1]:'')}</p>
 <div class="wbt">${q==wk?'<button class="play ok static">✓ НАДЕТО</button>':o?`<button class="play" data-a="weq" data-i="${q}">НАДЕТЬ</button>`:`<button class="play yl${WL.c<w.p?' off':''}" data-a="wbuy" data-i="${q}"><span>КУПИТЬ ${w.p}</span>${CI}</button>`}
 ${o&&!mx?`<button class="sec yl wup${WL.c<cost?' off':''}" data-a="wup" data-i="${q}"><span>УЛУЧШИТЬ ${cost}</span>${CI}</button>`:''}</div></div>`+nav('a');cshow()}
 function arsenal(){st='m';AS=null;rar();scr('ar')}
