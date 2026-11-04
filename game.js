@@ -60,7 +60,7 @@ mk('zsh','bl','Злой шарик','zloy_sharik.webp',UB),
 mk('bsv','bl','Bad Svin','bad_svin.webp',UB),
 mk('red','bl','Ред','red.webp',UB),
 mk('saw','bl','Пила','pila.webp',UB),
-mk('blch','ex','бля че это','blya_che_eto.webp',UJ),
+mk('blch','ex','камрад','blya_che_eto.webp',UJ),
 mk('dasha_fan_kiry','gb','даша фан киры','skin_dasha_fan_kiry.webp',UA)
 ];
 const CH=[['il','ІЛЮША'],['ct','КОТИК'],['nc','НЕКТАРИН'],['gb','ГОЛУБАЯ'],['bl','ШАРИК'],['ex','ЭКСКЛЮЗИВ']];/* ЭКОНОМИКА (ориентир: 1 минута активной игры ≈ 20 монет)
