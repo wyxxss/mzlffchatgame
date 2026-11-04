@@ -61,7 +61,7 @@ mk('bsv','bl','Bad Svin','bad_svin.webp',UB),
 mk('red','bl','Ред','red.webp',UB),
 mk('saw','bl','Пила','pila.webp',UB),
 mk('blch','ex','бля че это','blya_che_eto.webp',UJ),
-mk('dasha_fan_kiry','il','даша фан киры','skin_dasha_fan_kiry.webp',UA)
+mk('dasha_fan_kiry','gb','даша фан киры','skin_dasha_fan_kiry.webp',UA)
 ];
 const CH=[['il','ІЛЮША'],['ct','КОТИК'],['nc','НЕКТАРИН'],['gb','ГОЛУБАЯ'],['bl','ШАРИК'],['ex','ЭКСКЛЮЗИВ']];/* ЭКОНОМИКА (ориентир: 1 минута активной игры ≈ 20 монет)
    Доход: монета в среднем 1.48 (88% по 1, 12% по 5), падает раз в ~2.4 с, ловится ~60% → ≈ 20-22 монеты/мин, плюс награда за босса 25..50.
