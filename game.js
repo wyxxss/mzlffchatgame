@@ -230,6 +230,18 @@ const add=n=>{a+=n;b=a^KEY},ok=()=>b===(a^KEY);
 const CD={gap:[1.6,3.2],big:.12,v:1,vb:5,spd:[85,115]};
 let WL={c:0,v:0,own:[],eq:{},ch:'il',bx:0,pt:0,sk:0,sd:0,pl:0,gm:0,bk:0,fr:'',bg:'',fv:[],wp:[],we:'palm',wv:{}},pld=0,cdr=[],cdT=3,crun=0,wd=0,cs='m',TB='il',SL=null,ob=0;
 try{const sv=JSON.parse(localStorage.wl);Object.assign(WL,sv);if(sv.bx==null)WL.bx=(WL.own||[]).length}catch{}
+let csi=0;
+/* --- Казино: рулетка, ставки на цвет/ноль, попытки с восстановлением --- */
+const CSR=10*60*1000,CSD=3; // попытка восстанавливается раз в 10 мин, максимум 3 одновременно
+const CSO=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const CSRd=360/37;
+const CSRed=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+let CS={on:'r',bet:100,hi:[],sp:0,nT:0,rot:-CSRd/2,lk:0,nr:0,wt:'',wc:'#ffe600',wg:0};
+try{const s=JSON.parse(localStorage.cs||'null');if(s){CS.on=s.on||'r';CS.bet=s.bet||100;CS.hi=Array.isArray(s.hi)?s.hi.slice(0,5):[];CS.sp=Math.min(CSD,s.sp|0||0);CS.nT=s.nT||0;CS.rot=s.rot!=null?s.rot:-CSRd/2}}catch{}
+const CScol=n=>n===0?'g':CSRed.has(n)?'r':'b';
+const CSnm=c=>c=='g'?'ЗЕРО':c=='r'?'КРАСНОЕ':'ЧЁРНОЕ';
+const CScc=c=>c=='r'?'#ff2d55':c=='b'?'#14142b':'#c3ff00';
+const CSmult=c=>c=='g'?14:2;
 const wal=db?db.collection('wallets').doc(uid):null;
 const cshow=()=>{document.querySelectorAll('.cn').forEach(e=>{if(e._c!=null&&e._c!==WL.c){e.classList.remove('bmp');void e.offsetWidth;e.classList.add('bmp')}e._c=WL.c});document.querySelectorAll('.cv').forEach(e=>e.textContent=WL.c);try{const r=WL.c>=bpx()&&bp().some(z=>!ow(z));document.querySelectorAll('#m .row [data-a=shop],.nv [data-a=boxes]').forEach(e=>e.classList.toggle('rdy',r))}catch{}try{dchip()}catch{}};
 const wsave=()=>{WL.v++;try{localStorage.wl=JSON.stringify(WL)}catch{}wd=1;cshow()};
@@ -556,7 +568,7 @@ const rs=()=>{const r=Math.min(devicePixelRatio||1,2.5);cv.width=innerWidth*r;cv
 addEventListener('resize',rs);rs();
 
 // --- Экраны ---
-const scr=i=>{if(pld){pld=0;wsave()}wsync();cshow();cs=i;mc();try{['t','s','x','pr','fr','ar'].includes(i)?T.BackButton.show():T.BackButton.hide();i=='g'?T.enableClosingConfirmation():T.disableClosingConfirmation()}catch{}['m','t','o','p','s','x','ad','pr','fr','ar'].forEach(n=>$('#'+n)?.classList.toggle('on',n==i));cv.style.display=i=='g'||i=='o'||i=='p'?'block':'none'};
+const scr=i=>{if(pld){pld=0;wsave()}clearInterval(csi);wsync();cshow();cs=i;mc();try{['t','s','x','pr','fr','ar','cs'].includes(i)?T.BackButton.show():T.BackButton.hide();i=='g'?T.enableClosingConfirmation():T.disableClosingConfirmation()}catch{}['m','t','o','p','s','x','cs','ad','pr','fr','ar'].forEach(n=>$('#'+n)?.classList.toggle('on',n==i));$('#dock')?.classList.toggle('on',i=='m'||i=='cs');$('#dock')?.querySelectorAll('.dock-item').forEach(b=>b.classList.toggle('dock-act',b.dataset.a==i));cv.style.display=i=='g'||i=='o'||i=='p'?'block':'none'};
 const pq=()=>{let i;do i=Math.random()*Q.length|0;while(Q.length>1&&i==+localStorage.lq);localStorage.lq=i;return Q[i]};
 const menu=()=>{D=null;if(a>best&&ok()){best=a;localStorage.best=a;send()}flush();dflush();st='m';bo=null;ht=hl=0;hc(BG);const q=pq();$('#qt').textContent='«'+q[0]+'»';$('#qn').textContent=q[1];scr('m');gclaim()};
 
@@ -1079,7 +1091,47 @@ if(fine){localStorage.mig=1;wd=1;wsync()}}
 if(localStorage.pk===pk&&localStorage.psv==='2'&&(!ol||ol==uid||localStorage.mig))return;
 for(const c of['scores','scores_dj','wallets']){try{await db.collection(c).doc(uid).update(f)}catch(e){if(!(e&&e.code=='not-found'))ok_=0}}
 if(ok_){localStorage.pk=pk;localStorage.psv='2'}}
-const A={arsenal,wsel,wbuy,weq,wup,zpick,pfp,fvedit,fvt,fvsave,fvopen,fvx,fvn,frames,prof,pback,gift:gmodal,gamt,gsend,daily:dmodal,dclaim,dsave,drest,modes,dj:djstart,go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc,admin:adminPanel,admLoad:adminLoadPlayer,admPick:adminPick,admAdd:()=>adminCoins('add'),admSub:()=>adminCoins('sub'),admSet:()=>adminCoins('set'),admGrant:adminGrant,admRemove:adminRemove,admEquip:adminEquip,admScoreSet:()=>adminScore(false),admScoreClear:()=>adminScore(true),admWalletReset:adminWalletReset,admSkinCreate:adminSkinCreate,admSkinDel:adminSkinDelete};
+/* ================= КАЗИНО ================= */
+function csSave(){try{localStorage.cs=JSON.stringify({on:CS.on,bet:CS.bet,hi:CS.hi.slice(0,5),sp:CS.sp,nT:CS.nT,rot:CS.rot})}catch{}}
+function csRefill(){const n=Date.now();let u=0;while(CS.sp<CSD && n>=CS.nT){CS.sp++;CS.nT+=CSR;u++}if(u)csSave();return u}
+function csTick(){const n=Date.now();let u=0;while(CS.sp<CSD && n>=CS.nT){CS.sp++;CS.nT+=CSR;u++}if(u){csSave();csRender(false);return}const t=$('#ctimer');if(t){const l=Math.max(0,CS.nT-n);t.textContent=Math.floor(l/60000).toString().padStart(2,'0')+':'+Math.floor((l%60000)/1000).toString().padStart(2,'0');if(l<=0)csTick()}}
+function csRender(fr){
+  const e=$('#cs');if(!e)return;
+  clearInterval(csi);csi=0;csRefill();
+  const sp=CS.sp,locked=sp<=0,last=CS.hi[0],showRes=Boolean(CS.nr);
+  if(showRes)CS.nr=0;
+  const seg=CSRd,mult=CSmult(CS.on);
+  const stops=CSO.map((n,i)=>`${CScc(CScol(n))} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
+  const dots=CS.hi.map(n=>`<div class="csdot" style="background:${CScc(CScol(n))}"></div>`).join('')||'<div class="csdot" style="opacity:0"></div>';
+  const att=[...Array(CSD)].map((_,i)=>`<div class="csatt${i<sp?' on':''}"></div>`).join('');
+  const res=showRes&&last?`<div class="cs-res"><div class="csres-b" style="color:${CS.wc}">${CS.wt}</div><div class="csres-s">${CS.wg>0?`+${CS.bet*CS.wg} монет x${CS.wg}`:`-${CS.bet} монет`}</div></div>`:'';
+  e.innerHTML=`<div class="cs-head"><button class="sec bk" data-a="menu">←</button><h2>КАЗИНО</h2><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">${WL.c}</span></div><button class="sec" data-a="s" style="width:2.5rem;height:2.5rem;display:grid;place-items:center;border-radius:.9rem">+</button></div>${locked?`<div class="cs-lock"><div class="lock">🔒</div><h2>ПОПЫТКИ ЗАКОНЧИЛИСЬ</h2><p style="color:var(--d);font-weight:800;margin-bottom:1rem">следующая попытка через</p><div class="ctimer" id="ctimer">00:00</div><button class="play off" data-a="cspin"><span>ИГРАТЬ</span></button><p class="dn">попытки восстанавливаются автоматически</p></div>`:`<div class="cs-wheel-wrap"><div class="cswheel" id="csw" style="background:conic-gradient(${stops});transform:rotate(${CS.rot}deg)"></div><div class="csptr"></div><div class="cshub"><span class="wn" style="color:${last?CScc(CScol(last)):'var(--k)'}">${last||0}</span></div></div><div class="csrecent"><div class="csrt">ПОСЛЕДНИЕ</div><div class="csdots">${dots}</div></div><div class="cs-att">${att}<span>${sp}/${CSD} попытки</span></div><div class="cs-chips">${[50,100,250,500].map(n=>`<button class="cschip${n==CS.bet?' sel':''}" data-a="csb" data-i="${n}">${n}<img class="ccoin" src="coin.webp" alt=""></button>`).join('')}</div><div class="csbets"><button class="csbet r${CS.on=='r'?' sel':''}${showRes&&last&&CScol(last)=='r'?' win':''}" data-a="cschoice" data-i="r"><span>КРАСНОЕ</span><em>x2</em></button><button class="csbet g${CS.on=='g'?' sel':''}${showRes&&last&&CScol(last)=='g'?' win':''}" data-a="cschoice" data-i="g"><span>ЗЕРО</span><em>x14</em></button><button class="csbet b${CS.on=='b'?' sel':''}${showRes&&last&&CScol(last)=='b'?' win':''}" data-a="cschoice" data-i="b"><span>ЧЁРНОЕ</span><em>x2</em></button></div><div class="csline"><div><span style="opacity:.8">СТАВКА</span> <b>${CS.bet}${CI}</b> на ${CSnm(CS.on)}</div><em>${mult}</em></div><button class="play${WL.c>=CS.bet?' yl':' off'}" data-a="cspin"><span>${WL.c>=CS.bet?'КРУТИТЬ':'МОНЕТ НЕТ'}</span>${WL.c>=CS.bet?CI:''}</button>${res}`}</div>`;
+  if(locked){csi=setInterval(csTick,1000);csTick()}
+}
+function casino(){st='m';scr('cs');csRender(false)}
+function csb(n){CS.bet=n;csSave();csRender(false);hz('selectionChanged')}
+function cschoice(c){CS.on=c;csSave();csRender(false);hz('selectionChanged')}
+function cspin(){
+  if(CS.lk)return;
+  csRefill();
+  if(CS.sp<=0){csRender(false);return}
+  if(WL.c<CS.bet){scoreNote('Недостаточно монет',true);return}
+  const win=Math.floor(R(0,37)),idx=CSO.indexOf(win),col=CScol(win),mult=CSmult(col);
+  const g=CS.on===col?CS.bet*mult:0;
+  WL.c-=CS.bet;wsave();cshow();CS.lk=1;hz('impactOccurred','heavy');
+  const wheel=$('#csw'),need=((-idx*CSRd-CS.rot)%360+360)%360,fin=CS.rot+360*12+need;
+  CS.rot=(CS.rot+need)%360;
+  wheel.style.transition='none';
+  requestAnimationFrame(()=>{wheel.style.transition='transform 3.4s cubic-bezier(.04,.66,.18,1)';wheel.style.transform=`rotate(${fin}deg)`;});
+  setTimeout(()=>{
+    wheel.style.transition='none';
+    if(g>0){WL.c+=g;wsave();cshow();hz('impactOccurred','heavy')}
+    CS.wt=g>0?`ВЫИГРЫШ +${g}`:`ПРОИГРЫШ -${CS.bet}`;
+    CS.wc=g>0?'#ffe600':'#ff2d55';CS.wg=mult;CS.nr=1;
+    CS.sp--;csSave();csRender(true);CS.lk=0;
+  },3450);
+}
+const A={arsenal,wsel,wbuy,weq,wup,zpick,pfp,fvedit,fvt,fvsave,fvopen,fvx,fvn,frames,prof,pback,gift:gmodal,gamt,gsend,daily:dmodal,dclaim,dsave,drest,modes,dj:djstart,go,top:showTop,menu,res:resume,pause,shop,boxes,tab,sel,eq:wear,opn,mc,cs:casino,cspin,csb,cschoice,admin:adminPanel,admLoad:adminLoadPlayer,admPick:adminPick,admAdd:()=>adminCoins('add'),admSub:()=>adminCoins('sub'),admSet:()=>adminCoins('set'),admGrant:adminGrant,admRemove:adminRemove,admEquip:adminEquip,admScoreSet:()=>adminScore(false),admScoreClear:()=>adminScore(true),admWalletReset:adminWalletReset,admSkinCreate:adminSkinCreate,admSkinDel:adminSkinDelete};
 document.onclick=e=>{if(performance.now()<lock)return;const el=e.target.closest('[data-a]');if(el)A[el.dataset.a]?.(el.dataset.i)};
 document.addEventListener('keydown',e=>{if(FVO&&e.key=='Escape'){fvx();return}if(e.key=='Escape'||e.key=='p'||e.key=='P')st=='p'?pause():st=='pa'&&resume()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(st=='p')pause();if(ok()&&a>0)send()}else flush()});

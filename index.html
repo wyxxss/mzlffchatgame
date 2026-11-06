@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@700;800&family=Unbounded:wght@900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 </head><body>
 <canvas id="cv"></canvas>
 <main id="m" class="scr on">
@@ -16,7 +16,7 @@
 <div class="card"><p id="qt"></p><i id="qn"></i></div>
 <div class="sp" data-a="shop" title="Сменить скин"><div class="sp-stage"><img id="i1" alt=""></div><div class="sp-tag"><span id="skinName">Обычный Ілюша</span> <i>· сменить</i></div></div>
 <button class="play" data-a="modes">ИГРАТЬ</button>
-<div class="row"><button class="sec" data-a="top">ТОП</button><button class="sec" data-a="prof">ПРОФИЛЬ</button><button class="sec yl" data-a="shop">МАГАЗИН</button></div>
+<div class="row"><button class="sec" data-a="top">ТОП</button><button class="sec" data-a="cs">КАЗИНО</button><button class="sec" data-a="prof">ПРОФИЛЬ</button><button class="sec yl" data-a="shop">МАГАЗИН</button></div>
 <div class="gr"></div>
 </main>
 <section id="t" class="scr"><div class="hd"><button class="sec bk" data-a="menu"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h2>ТОП ЧАТА</h2><div class="cn"><img class="ci" src="coin.webp" alt=""><span class="cv">0</span></div></div><div class="tabs"><button class="sec yl" id="tc" data-a="top" data-i="c">КЛАССИКА</button><button class="sec" id="td" data-a="top" data-i="d">ДУДЛ</button></div><div class="L" id="L"></div><div class="gr"></div></section>
@@ -28,5 +28,13 @@
 <section id="ad" class="scr"></section>
 <section id="pr" class="scr"></section>
 <section id="ar" class="scr"></section>
-<script src="game.js?v=27"></script>
+<section id="cs" class="scr"></section>
+<div class="dock" id="dock">
+  <button class="dock-item" data-a="menu"><span class="dicon">🏠</span><span class="dlab">ГЛАВНАЯ</span></button>
+  <button class="dock-item" data-a="top"><span class="dicon">🏆</span><span class="dlab">ТОП</span></button>
+  <button class="dock-item dock-act" data-a="cs"><span class="dicon">🎰</span><span class="dlab">КАЗИНО</span></button>
+  <button class="dock-item" data-a="pr"><span class="dicon">👤</span><span class="dlab">ПРОФИЛЬ</span></button>
+  <button class="dock-item" data-a="s"><span class="dicon">🛍️</span><span class="dlab">МАГАЗИН</span></button>
+</div>
+<script src="game.js?v=28"></script>
 </body></html>
